@@ -1,39 +1,31 @@
 <x-guest-layout>
-    <form method="POST" action="{{ route('password.store') }}">
+    <x-slot name="title">Nueva contrasena | Somos Peru Olleros</x-slot>
+    <x-slot name="heading">Nueva contrasena</x-slot>
+    <x-slot name="subheading">Define una clave segura para volver a ingresar.</x-slot>
+
+    <form method="POST" action="{{ route('password.store') }}" class="space-y-5">
         @csrf
 
-        <!-- Password Reset Token -->
         <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
-        <!-- Email Address -->
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $request->email)" required autofocus autocomplete="username" />
+            <label class="campaign-label" for="email">Correo electronico</label>
+            <input id="email" class="campaign-input" type="email" name="email" value="{{ old('email', $request->email) }}" required autofocus autocomplete="username">
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
+        <div>
+            <label class="campaign-label" for="password">Contrasena</label>
+            <input id="password" class="campaign-input" type="password" name="password" required autocomplete="new-password" placeholder="********">
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                                type="password"
-                                name="password_confirmation" required autocomplete="new-password" />
-
+        <div>
+            <label class="campaign-label" for="password_confirmation">Confirmar contrasena</label>
+            <input id="password_confirmation" class="campaign-input" type="password" name="password_confirmation" required autocomplete="new-password" placeholder="********">
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Reset Password') }}
-            </x-primary-button>
-        </div>
+        <button class="campaign-button-primary w-full py-4" type="submit">Restablecer contrasena</button>
     </form>
 </x-guest-layout>

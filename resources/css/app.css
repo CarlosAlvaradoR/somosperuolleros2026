@@ -1,3 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Work+Sans:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply bg-background font-sans text-on-surface antialiased;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+    ::selection {
+        @apply bg-primary-fixed text-primary;
+    }
+}
+
+@layer components {
+    .campaign-container {
+        @apply mx-auto w-full max-w-campaign px-5 md:px-6;
+    }
+
+    .campaign-card {
+        @apply rounded-2xl border border-outline-variant/30 bg-surface-container-lowest shadow-civic;
+    }
+
+    .campaign-button {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 font-semibold tracking-wide transition duration-200 active:scale-[0.98];
+    }
+
+    .campaign-button-primary {
+        @apply campaign-button bg-primary text-on-primary shadow-civic hover:bg-secondary;
+    }
+
+    .campaign-button-outline {
+        @apply campaign-button border-2 border-primary bg-transparent text-primary hover:bg-primary-fixed/40;
+    }
+
+    .campaign-input {
+        @apply w-full rounded-lg border-outline-variant bg-surface-container-low px-4 py-3 text-on-surface placeholder:text-outline focus:border-primary focus:ring-primary/25;
+    }
+
+    .campaign-label {
+        @apply mb-2 block text-sm font-semibold uppercase tracking-wide text-on-surface-variant;
+    }
+
+    .material-symbols-outlined {
+        font-family: 'Material Symbols Outlined';
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        word-wrap: normal;
+        direction: ltr;
+        font-feature-settings: 'liga';
+        -webkit-font-feature-settings: 'liga';
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .brand-heart {
+        @apply relative flex h-12 w-12 shrink-0 items-center justify-center text-[9px] font-extrabold uppercase leading-none text-primary;
+    }
+
+    .brand-heart::before {
+        content: '';
+        @apply absolute inset-1 rounded-lg border-4 border-secondary bg-white;
+        transform: rotate(45deg);
+        border-top-color: transparent;
+        border-left-color: transparent;
+    }
+
+    .brand-heart span {
+        @apply relative z-10 text-center;
+    }
+}

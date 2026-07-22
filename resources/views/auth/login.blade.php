@@ -1,47 +1,44 @@
 <x-guest-layout>
+    <x-slot name="title">Iniciar sesion | Somos Peru Olleros</x-slot>
+    <x-slot name="heading">Bienvenido de nuevo</x-slot>
+    <x-slot name="subheading">Accede a tu cuenta para continuar con el futuro.</x-slot>
+
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <form method="POST" action="{{ route('login') }}">
+    <form method="POST" action="{{ route('login') }}" class="space-y-6">
         @csrf
 
-        <!-- Email Address -->
         <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
+            <label class="campaign-label" for="email">Correo electronico</label>
+            <input id="email" class="campaign-input" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" placeholder="tu@ejemplo.com">
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+        <div>
+            <div class="mb-2 flex items-center justify-between">
+                <label class="block text-sm font-semibold uppercase tracking-wide text-on-surface-variant" for="password">Contrasena</label>
+                @if (Route::has('password.request'))
+                    <a class="text-sm font-bold text-primary hover:underline" href="{{ route('password.request') }}">Olvidaste tu contrasena?</a>
+                @endif
+            </div>
+            <input id="password" class="campaign-input" type="password" name="password" required autocomplete="current-password" placeholder="********">
 
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
+        <div>
             <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+                <input id="remember_me" type="checkbox" class="rounded border-outline-variant text-primary shadow-sm focus:ring-primary" name="remember">
+                <span class="ms-2 text-sm text-on-surface-variant">Recordar mi sesion</span>
             </label>
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
+        <button class="campaign-button-primary w-full py-4" type="submit">Iniciar sesion</button>
 
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
+        <div class="border-t border-outline-variant/30 pt-6 text-center text-on-surface-variant">
+            Aun no tienes cuenta?
+            <a href="{{ route('register') }}" class="font-bold text-primary hover:underline">Registrate aqui</a>
         </div>
     </form>
 </x-guest-layout>
