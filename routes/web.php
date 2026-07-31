@@ -39,6 +39,7 @@ Route::get('/', function () {
     $contributions = DB::table('transparency_contributions')
         ->whereNull('deleted_at')
         ->where('active', true)
+        ->orderBy('sort_order')
         ->orderByDesc('contribution_date')
         ->get();
 
@@ -55,6 +56,7 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [CampaignDashboardController::class, 'index'])->name('dashboard');
     Route::patch('/dashboard/visibility', [CampaignDashboardController::class, 'updateVisibility'])->name('dashboard.visibility.update');
+    Route::patch('/dashboard/reordenar/{type}', [CampaignDashboardController::class, 'reorder'])->name('dashboard.reorder');
     Route::post('/dashboard/proposals', [CampaignDashboardController::class, 'storeProposal'])->name('dashboard.proposals.store');
     Route::patch('/dashboard/proposals/{proposal}', [CampaignDashboardController::class, 'updateProposal'])->name('dashboard.proposals.update');
     Route::delete('/dashboard/proposals/{proposal}', [CampaignDashboardController::class, 'destroyProposal'])->name('dashboard.proposals.destroy');

@@ -39,6 +39,7 @@ class CampaignDashboardController extends Controller
 
         $contributions = DB::table('transparency_contributions')
             ->whereNull('deleted_at')
+            ->orderBy('sort_order')
             ->orderByDesc('contribution_date')
             ->orderByDesc('id')
             ->get();
@@ -95,23 +96,78 @@ class CampaignDashboardController extends Controller
         return back()->with('status', $message);
     }
 
+    public function reorder(Request $request, string $type): JsonResponse
+    {
+        $tables = [
+            'propuestas' => 'government_proposals',
+            'regidores' => 'council_members',
+            'galeria' => 'district_gallery_images',
+            'transparencia' => 'transparency_contributions',
+        ];
+
+        abort_unless(array_key_exists($type, $tables), 404);
+
+        $data = $request->validate([
+            'items' => ['required', 'array'],
+            'items.*' => ['integer'],
+        ]);
+
+        $orders = [];
+
+        DB::transaction(function () use ($data, $tables, $type, &$orders) {
+            foreach (array_values($data['items']) as $index => $id) {
+                $order = ($index + 1) * 10;
+                $orders[$id] = $order;
+
+                DB::table($tables[$type])
+                    ->where('id', $id)
+                    ->whereNull('deleted_at')
+                    ->update([
+                        'sort_order' => $order,
+                        'updated_at' => now(),
+                    ]);
+            }
+        });
+
+        return response()->json([
+            'message' => 'Orden actualizado correctamente.',
+            'orders' => $orders,
+        ]);
+    }
+
     public function storeProposal(Request $request): RedirectResponse|JsonResponse
     {
+        $data = $request->validate([
+            'title' => ['nullable', 'string', 'max:255'],
+            'category' => ['nullable', 'string', 'max:255'],
+            'summary' => ['nullable', 'string'],
+            'icon' => ['nullable', 'string', 'max:255'],
+            'image_path' => ['nullable', 'string'],
+            'image' => ['nullable', 'image', 'max:4096'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'active' => ['nullable', 'boolean'],
+            'is_featured' => ['nullable', 'boolean'],
+        ]);
+
         $nextOrder = ((int) DB::table('government_proposals')
             ->whereNull('deleted_at')
             ->max('sort_order')) + 10;
 
+        $title = ($data['title'] ?? null) ?: 'Nueva propuesta';
+        $summary = ($data['summary'] ?? null) ?: 'Describe aquí la propuesta para mostrarla en la landing.';
+        $imagePath = $this->storeUploadedImage($request, 'image', 'propuestas') ?: ($data['image_path'] ?? null);
+
         $id = DB::table('government_proposals')->insertGetId([
-            'icon' => 'flag',
-            'title' => 'Nueva propuesta',
-            'category' => 'General',
-            'summary' => 'Describe aquí la propuesta para mostrarla en la landing.',
-            'description' => 'Describe aquí la propuesta para mostrarla en la landing.',
-            'image_path' => null,
-            'image_alt' => 'Nueva propuesta',
-            'sort_order' => $nextOrder,
-            'is_featured' => false,
-            'active' => true,
+            'icon' => ($data['icon'] ?? null) ?: 'flag',
+            'title' => $title,
+            'category' => ($data['category'] ?? null) ?: 'General',
+            'summary' => $summary,
+            'description' => $summary,
+            'image_path' => $imagePath,
+            'image_alt' => $title,
+            'sort_order' => $data['sort_order'] ?? $nextOrder,
+            'is_featured' => $request->boolean('is_featured'),
+            'active' => $request->boolean('active', true),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -119,7 +175,7 @@ class CampaignDashboardController extends Controller
         if ($request->expectsJson()) {
             $proposal = DB::table('government_proposals')->find($id);
 
-            return $this->jsonFragment('Nueva propuesta creada.', 'dashboard.partials.proposal', compact('proposal'));
+            return $this->jsonFragment('Nueva propuesta creada.', 'dashboard.partials.proposal-row', compact('proposal'));
         }
 
         return back()->with('status', 'Nueva propuesta creada.');
@@ -133,10 +189,19 @@ class CampaignDashboardController extends Controller
             'summary' => ['nullable', 'string'],
             'icon' => ['nullable', 'string', 'max:255'],
             'image_path' => ['nullable', 'string'],
+            'image' => ['nullable', 'image', 'max:4096'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'active' => ['nullable', 'boolean'],
             'is_featured' => ['nullable', 'boolean'],
         ]);
+
+        $current = DB::table('government_proposals')
+            ->where('id', $proposal)
+            ->whereNull('deleted_at')
+            ->first();
+        abort_if(! $current, 404);
+
+        $imagePath = $this->storeUploadedImage($request, 'image', 'propuestas', $current->image_path) ?: ($data['image_path'] ?? null);
 
         DB::table('government_proposals')
             ->where('id', $proposal)
@@ -147,7 +212,7 @@ class CampaignDashboardController extends Controller
                 'summary' => $data['summary'] ?? null,
                 'description' => $data['summary'] ?? null,
                 'icon' => $data['icon'] ?: 'flag',
-                'image_path' => $data['image_path'] ?? null,
+                'image_path' => $imagePath,
                 'image_alt' => $data['title'],
                 'sort_order' => $data['sort_order'] ?? 0,
                 'active' => $request->boolean('active'),
@@ -158,7 +223,7 @@ class CampaignDashboardController extends Controller
         if ($request->expectsJson()) {
             $proposal = DB::table('government_proposals')->find($proposal);
 
-            return $this->jsonFragment('Propuesta guardada correctamente.', 'dashboard.partials.proposal', compact('proposal'));
+            return $this->jsonFragment('Propuesta guardada correctamente.', 'dashboard.partials.proposal-row', compact('proposal'));
         }
 
         return back()->with('status', 'Propuesta guardada.');
@@ -186,6 +251,7 @@ class CampaignDashboardController extends Controller
     {
         $data = $this->validateCouncilMember($request);
         $data['photo_path'] = $this->storeUploadedImage($request, 'photo', 'regidores') ?: $this->defaultImagePlaceholder();
+        unset($data['photo']);
         $data['photo_alt'] = $data['name'];
         $data['sort_order'] = $data['sort_order'] ?? $this->nextSortOrder('council_members');
         $data['active'] = $request->boolean('active', true);
@@ -195,7 +261,7 @@ class CampaignDashboardController extends Controller
         $id = DB::table('council_members')->insertGetId($data);
         $member = DB::table('council_members')->find($id);
 
-        return $this->jsonFragment('Regidor agregado correctamente.', 'dashboard.partials.council-member', compact('member'));
+        return $this->jsonFragment('Regidor agregado correctamente.', 'dashboard.partials.council-row', compact('member'));
     }
 
     public function updateCouncilMember(Request $request, int $member): JsonResponse
@@ -205,6 +271,7 @@ class CampaignDashboardController extends Controller
 
         $data = $this->validateCouncilMember($request);
         $data['photo_path'] = $this->storeUploadedImage($request, 'photo', 'regidores', $current->photo_path);
+        unset($data['photo']);
         $data['photo_alt'] = $data['name'];
         $data['sort_order'] = $data['sort_order'] ?? 0;
         $data['active'] = $request->boolean('active');
@@ -213,7 +280,7 @@ class CampaignDashboardController extends Controller
         DB::table('council_members')->where('id', $member)->update($data);
         $member = DB::table('council_members')->find($member);
 
-        return $this->jsonFragment('Regidor guardado correctamente.', 'dashboard.partials.council-member', compact('member'));
+        return $this->jsonFragment('Regidor guardado correctamente.', 'dashboard.partials.council-row', compact('member'));
     }
 
     public function destroyCouncilMember(int $member): JsonResponse
@@ -231,6 +298,7 @@ class CampaignDashboardController extends Controller
     {
         $data = $this->validateDistrictImage($request);
         $data['image_path'] = $this->storeUploadedImage($request, 'image', 'distrito') ?: $request->input('image_path') ?: $this->defaultImagePlaceholder();
+        unset($data['image']);
         $data['image_alt'] = $data['title'] ?: 'Imagen del distrito';
         $data['sort_order'] = $data['sort_order'] ?? $this->nextSortOrder('district_gallery_images');
         $data['active'] = $request->boolean('active', true);
@@ -240,7 +308,7 @@ class CampaignDashboardController extends Controller
         $id = DB::table('district_gallery_images')->insertGetId($data);
         $image = DB::table('district_gallery_images')->find($id);
 
-        return $this->jsonFragment('Foto del distrito agregada correctamente.', 'dashboard.partials.district-image', compact('image'));
+        return $this->jsonFragment('Foto del distrito agregada correctamente.', 'dashboard.partials.district-card', compact('image'));
     }
 
     public function updateDistrictImage(Request $request, int $image): JsonResponse
@@ -250,6 +318,7 @@ class CampaignDashboardController extends Controller
 
         $data = $this->validateDistrictImage($request);
         $data['image_path'] = $this->storeUploadedImage($request, 'image', 'distrito', $current->image_path) ?: $request->input('image_path');
+        unset($data['image']);
         $data['image_alt'] = $data['title'] ?: 'Imagen del distrito';
         $data['sort_order'] = $data['sort_order'] ?? 0;
         $data['active'] = $request->boolean('active');
@@ -258,7 +327,7 @@ class CampaignDashboardController extends Controller
         DB::table('district_gallery_images')->where('id', $image)->update($data);
         $image = DB::table('district_gallery_images')->find($image);
 
-        return $this->jsonFragment('Foto del distrito guardada correctamente.', 'dashboard.partials.district-image', compact('image'));
+        return $this->jsonFragment('Foto del distrito guardada correctamente.', 'dashboard.partials.district-card', compact('image'));
     }
 
     public function destroyDistrictImage(int $image): JsonResponse
@@ -275,6 +344,7 @@ class CampaignDashboardController extends Controller
     public function storeContribution(Request $request): JsonResponse
     {
         $data = $this->validateContribution($request);
+        $data['sort_order'] = $data['sort_order'] ?? $this->nextSortOrder('transparency_contributions');
         $data['active'] = $request->boolean('active', true);
         $data['created_at'] = now();
         $data['updated_at'] = now();
@@ -282,12 +352,13 @@ class CampaignDashboardController extends Controller
         $id = DB::table('transparency_contributions')->insertGetId($data);
         $contribution = DB::table('transparency_contributions')->find($id);
 
-        return $this->jsonFragment('Aportante agregado correctamente.', 'dashboard.partials.contribution', compact('contribution'));
+        return $this->jsonFragment('Aportante agregado correctamente.', 'dashboard.partials.contribution-row', compact('contribution'));
     }
 
     public function updateContribution(Request $request, int $contribution): JsonResponse
     {
         $data = $this->validateContribution($request);
+        $data['sort_order'] = $data['sort_order'] ?? 0;
         $data['active'] = $request->boolean('active');
         $data['updated_at'] = now();
 
@@ -298,7 +369,7 @@ class CampaignDashboardController extends Controller
 
         $contribution = DB::table('transparency_contributions')->find($contribution);
 
-        return $this->jsonFragment('Aportante guardado correctamente.', 'dashboard.partials.contribution', compact('contribution'));
+        return $this->jsonFragment('Aportante guardado correctamente.', 'dashboard.partials.contribution-row', compact('contribution'));
     }
 
     public function destroyContribution(int $contribution): JsonResponse
@@ -344,6 +415,7 @@ class CampaignDashboardController extends Controller
             'amount' => ['nullable', 'numeric', 'min:0'],
             'currency' => ['nullable', 'string', 'max:3'],
             'contribution_date' => ['nullable', 'date'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
         ]) + ['currency' => 'PEN'];
     }
 
@@ -381,6 +453,8 @@ class CampaignDashboardController extends Controller
 
     private function jsonFragment(string $message, string $view, array $data): JsonResponse
     {
+        $data['defaultImage'] ??= $this->defaultImagePlaceholder();
+
         return response()->json([
             'message' => $message,
             'html' => view($view, $data)->render(),

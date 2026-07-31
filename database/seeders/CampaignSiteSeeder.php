@@ -369,7 +369,7 @@ class CampaignSiteSeeder extends Seeder
             ['Aporte voluntario individual', 'Económico', 'S/ 500.00', 500.00, '2026-10-10'],
         ];
 
-        foreach ($contributions as [$contributor, $type, $detail, $amount, $date]) {
+        foreach ($contributions as $index => [$contributor, $type, $detail, $amount, $date]) {
             DB::table('transparency_contributions')->updateOrInsert(
                 [
                     'contributor_name' => $contributor,
@@ -380,6 +380,7 @@ class CampaignSiteSeeder extends Seeder
                     'detail' => $detail,
                     'amount' => $amount,
                     'currency' => 'PEN',
+                    'sort_order' => ($index + 1) * 10,
                     'active' => true,
                     'updated_at' => $now,
                     'created_at' => $now,

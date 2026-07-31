@@ -9,30 +9,54 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="bg-background text-on-surface antialiased">
-        <div class="flex min-h-screen" x-data="{ sidebar: false }">
+        <div
+            class="flex min-h-screen"
+            x-data="{
+                sidebar: false,
+                dashboardPanel: ['inicio', 'propuestas', 'regidores', 'galeria', 'transparencia', 'configuracion'].includes(window.location.hash.replace('#', '')) ? window.location.hash.replace('#', '') : 'inicio',
+                openDashboardPanel(panel) {
+                    if (! window.location.pathname.includes('/dashboard')) {
+                        window.location.href = '{{ route('dashboard') }}#' + panel;
+                        return;
+                    }
+
+                    this.dashboardPanel = panel;
+                    this.sidebar = false;
+                    history.replaceState(null, '', `#${panel}`);
+                }
+            }"
+        >
             <aside class="fixed inset-y-0 left-0 z-50 w-72 -translate-x-full border-r border-outline-variant/30 bg-surface-container-lowest transition lg:static lg:translate-x-0" :class="{ 'translate-x-0': sidebar }">
                 <div class="flex h-20 items-center border-b border-outline-variant/20 px-6">
                     <x-campaign-logo class="[&>img]:h-10 [&>span:last-child]:text-[18px]" />
                 </div>
 
                 <nav class="flex-1 space-y-2 px-4 py-6">
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-3 rounded-lg bg-primary-fixed px-4 py-3 text-[15px] font-semibold text-primary">
+                    <a href="{{ route('dashboard') }}#inicio" x-on:click.prevent="openDashboardPanel('inicio')" class="flex items-center gap-3 rounded-lg px-4 py-3 text-[14px] font-semibold transition" :class="dashboardPanel === 'inicio' ? 'bg-primary-fixed text-primary' : 'text-on-surface-variant hover:bg-surface-container'">
                         <span class="material-symbols-outlined text-[22px]">dashboard</span>
                         Inicio
                     </a>
-                    <a href="#" class="flex items-center gap-3 rounded-lg px-4 py-3 text-[15px] font-semibold text-on-surface-variant transition hover:bg-surface-container">
+                    <a href="{{ route('dashboard') }}#propuestas" x-on:click.prevent="openDashboardPanel('propuestas')" class="flex items-center gap-3 rounded-lg px-4 py-3 text-[14px] font-semibold transition" :class="dashboardPanel === 'propuestas' ? 'bg-primary-fixed text-primary' : 'text-on-surface-variant hover:bg-surface-container'">
                         <span class="material-symbols-outlined text-[22px]">description</span>
                         Propuestas
                     </a>
-                    <a href="#" class="flex items-center gap-3 rounded-lg px-4 py-3 text-[15px] font-semibold text-on-surface-variant transition hover:bg-surface-container">
+                    <a href="{{ route('dashboard') }}#regidores" x-on:click.prevent="openDashboardPanel('regidores')" class="flex items-center gap-3 rounded-lg px-4 py-3 text-[14px] font-semibold transition" :class="dashboardPanel === 'regidores' ? 'bg-primary-fixed text-primary' : 'text-on-surface-variant hover:bg-surface-container'">
+                        <span class="material-symbols-outlined text-[22px]">groups</span>
+                        Regidores
+                    </a>
+                    <a href="{{ route('dashboard') }}#galeria" x-on:click.prevent="openDashboardPanel('galeria')" class="flex items-center gap-3 rounded-lg px-4 py-3 text-[14px] font-semibold transition" :class="dashboardPanel === 'galeria' ? 'bg-primary-fixed text-primary' : 'text-on-surface-variant hover:bg-surface-container'">
+                        <span class="material-symbols-outlined text-[22px]">photo_library</span>
+                        Galería
+                    </a>
+                    <a href="{{ route('dashboard') }}#transparencia" x-on:click.prevent="openDashboardPanel('transparencia')" class="flex items-center gap-3 rounded-lg px-4 py-3 text-[14px] font-semibold transition" :class="dashboardPanel === 'transparencia' ? 'bg-primary-fixed text-primary' : 'text-on-surface-variant hover:bg-surface-container'">
                         <span class="material-symbols-outlined text-[22px]">account_balance_wallet</span>
                         Transparencia
                     </a>
-                    <a href="#" class="flex items-center gap-3 rounded-lg px-4 py-3 text-[15px] font-semibold text-on-surface-variant transition hover:bg-surface-container">
+                    <a href="{{ route('dashboard') }}#configuracion" x-on:click.prevent="openDashboardPanel('configuracion')" class="flex items-center gap-3 rounded-lg px-4 py-3 text-[14px] font-semibold transition" :class="dashboardPanel === 'configuracion' ? 'bg-primary-fixed text-primary' : 'text-on-surface-variant hover:bg-surface-container'">
                         <span class="material-symbols-outlined text-[22px]">settings</span>
-                        Configuracion
+                        Configuración
                     </a>
-                    <a href="{{ route('landing') }}" class="flex items-center gap-3 rounded-lg px-4 py-3 text-[15px] font-semibold text-on-surface-variant transition hover:bg-surface-container">
+                    <a href="{{ route('landing') }}" class="flex items-center gap-3 rounded-lg px-4 py-3 text-[14px] font-semibold text-on-surface-variant transition hover:bg-surface-container">
                         <span class="material-symbols-outlined text-[22px]">public</span>
                         Ver landing
                     </a>

@@ -154,6 +154,7 @@ return new class extends Migration
             $table->decimal('amount', 12, 2)->nullable();
             $table->string('currency', 3)->default('PEN');
             $table->date('contribution_date')->nullable()->index();
+            $table->unsignedInteger('sort_order')->default(0)->index();
             $table->boolean('active')->default(true)->index();
             $table->timestamps();
             $table->softDeletes();

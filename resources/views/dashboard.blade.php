@@ -30,7 +30,7 @@
             </div>
         @endif
 
-        <section class="grid gap-5 md:grid-cols-4">
+        <section class="grid gap-5 md:grid-cols-4" x-show="dashboardPanel === 'inicio'" x-cloak>
             @foreach ([
                 ['visibility', 'Secciones activas', $stats['visible_sections'], 'Landing pública'],
                 ['groups', 'Voluntarios', $stats['supporters'], 'Registrados'],
@@ -54,6 +54,31 @@
             @endforeach
         </section>
 
+        <section class="campaign-card p-6 md:p-8" x-show="dashboardPanel === 'inicio'" x-cloak>
+            <div class="mb-6">
+                <h2 class="font-headline text-[24px] font-bold text-on-surface">Paneles de gestion</h2>
+                <p class="mt-1 text-[14px] text-on-surface-variant">Elige que contenido quieres editar. Cada panel guarda sin recargar la página.</p>
+            </div>
+
+            <div class="grid gap-4 md:grid-cols-3">
+                @foreach ([
+                    ['propuestas', 'description', 'Propuestas', 'Edita los pilares del plan de gobierno.'],
+                    ['regidores', 'groups', 'Regidores', 'Actualiza el equipo municipal y sus fotos.'],
+                    ['galeria', 'photo_library', 'Galería', 'Administra las imágenes del distrito.'],
+                    ['transparencia', 'account_balance_wallet', 'Transparencia', 'Registra aportantes y detalles públicos.'],
+                    ['configuracion', 'visibility', 'Configuración', 'Muestra u oculta secciones de la landing.'],
+                ] as [$panel, $icon, $title, $description])
+                    <button class="rounded-xl border border-outline-variant/30 bg-white p-5 text-left transition hover:border-primary/50 hover:bg-primary/5" type="button" x-on:click="openDashboardPanel('{{ $panel }}')">
+                        <span class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary-fixed text-primary">
+                            <span class="material-symbols-outlined text-[22px]">{{ $icon }}</span>
+                        </span>
+                        <span class="block text-[15px] font-bold text-primary">{{ $title }}</span>
+                        <span class="mt-1 block text-[13px] leading-6 text-on-surface-variant">{{ $description }}</span>
+                    </button>
+                @endforeach
+            </div>
+        </section>
+
         <form
             class="campaign-card p-6 md:p-8"
             method="POST"
@@ -72,6 +97,8 @@
                 if (counter && data.visible_sections !== undefined) counter.textContent = data.visible_sections;
             }}"
             x-on:submit.prevent="save($event)"
+            x-show="dashboardPanel === 'configuracion'"
+            x-cloak
         >
             @csrf
             @method('PATCH')
@@ -106,189 +133,293 @@
             </div>
         </form>
 
-        <section class="campaign-card p-6 md:p-8">
+
+        <section class="campaign-card p-6 md:p-8" x-show="dashboardPanel === 'propuestas'" x-cloak>
             <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div class="flex items-center gap-3">
                     <span class="material-symbols-outlined text-primary">edit_note</span>
-                    <h2 class="font-headline text-[24px] font-bold text-on-surface">Editar propuestas</h2>
+                    <div>
+                        <h2 class="font-headline text-[24px] font-bold text-on-surface">Propuestas</h2>
+                        <p class="text-[13px] text-on-surface-variant">Administra los pilares que aparecen en la landing.</p>
+                    </div>
                 </div>
-                <form method="POST" action="{{ route('dashboard.proposals.store') }}" data-ajax-form data-append="#proposal-list">
-                    @csrf
-                    <button class="campaign-button-primary justify-center" type="submit">
-                        <span class="material-symbols-outlined text-[20px]">add</span>
-                        Nueva propuesta
-                    </button>
-                </form>
+                <button class="campaign-button-primary justify-center" type="button" data-open-modal="proposal-modal" data-mode="create" data-action="{{ route('dashboard.proposals.store') }}" data-append="#proposal-list">
+                    <span class="material-symbols-outlined text-[20px]">add</span>
+                    Nueva propuesta
+                </button>
             </div>
 
-            <div id="proposal-list" class="space-y-5">
-                @forelse ($proposals as $proposal)
-                    <article id="proposal-{{ $proposal->id }}" class="grid gap-5 rounded-xl border border-outline-variant/20 bg-surface-container-low p-5 md:grid-cols-[12rem_1fr_auto]">
-                        <div class="h-32 overflow-hidden rounded-lg bg-primary-fixed">
-                            <img class="h-full w-full object-cover" src="{{ $proposal->image_path ?: $defaultImage }}" alt="{{ $proposal->image_alt ?: $proposal->title }}">
-                        </div>
-
-                        <form id="proposal-form-{{ $proposal->id }}" class="grid gap-4 md:grid-cols-2" method="POST" action="{{ route('dashboard.proposals.update', $proposal->id) }}" data-ajax-form data-replace="#proposal-{{ $proposal->id }}">
-                            @csrf
-                            @method('PATCH')
-
-                            <div>
-                                <label class="campaign-label" for="title-{{ $proposal->id }}">Título de propuesta</label>
-                                <input id="title-{{ $proposal->id }}" name="title" class="campaign-input bg-white" value="{{ $proposal->title }}" required>
-                            </div>
-                            <div>
-                                <label class="campaign-label" for="category-{{ $proposal->id }}">Categoría</label>
-                                <input id="category-{{ $proposal->id }}" name="category" class="campaign-input bg-white" value="{{ $proposal->category }}">
-                            </div>
-                            <div>
-                                <label class="campaign-label" for="icon-{{ $proposal->id }}">Icono</label>
-                                <input id="icon-{{ $proposal->id }}" name="icon" class="campaign-input bg-white" value="{{ $proposal->icon }}" placeholder="water_drop">
-                            </div>
-                            <div>
-                                <label class="campaign-label" for="order-{{ $proposal->id }}">Orden</label>
-                                <input id="order-{{ $proposal->id }}" name="sort_order" type="number" min="0" class="campaign-input bg-white" value="{{ $proposal->sort_order }}">
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="campaign-label" for="summary-{{ $proposal->id }}">Descripción</label>
-                                <textarea id="summary-{{ $proposal->id }}" name="summary" class="campaign-input bg-white" rows="2">{{ $proposal->summary }}</textarea>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="campaign-label" for="image-{{ $proposal->id }}">URL de foto</label>
-                                <input id="image-{{ $proposal->id }}" name="image_path" class="campaign-input bg-white" value="{{ $proposal->image_path }}">
-                            </div>
-                            <label class="flex items-center gap-3 text-sm font-semibold text-on-surface-variant">
-                                <input class="h-5 w-5 rounded border-outline text-primary focus:ring-primary" name="active" type="checkbox" value="1" @checked($proposal->active)>
-                                Mostrar en landing
-                            </label>
-                            <label class="flex items-center gap-3 text-sm font-semibold text-on-surface-variant">
-                                <input class="h-5 w-5 rounded border-outline text-primary focus:ring-primary" name="is_featured" type="checkbox" value="1" @checked($proposal->is_featured)>
-                                Destacada
-                            </label>
-                        </form>
-
-                        <div class="flex items-end gap-2 md:flex-col md:justify-end">
-                            <button class="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-[13px] font-semibold text-on-primary shadow-sm transition hover:bg-secondary" type="submit" form="proposal-form-{{ $proposal->id }}" aria-label="Guardar propuesta">
-                                <span class="material-symbols-outlined text-[19px]">save</span>
-                                <span>Guardar</span>
-                            </button>
-                            <form method="POST" action="{{ route('dashboard.proposals.destroy', $proposal->id) }}" data-ajax-delete data-remove="#proposal-{{ $proposal->id }}">
-                                @csrf
-                                @method('DELETE')
-                                <button class="inline-flex items-center justify-center gap-2 rounded-xl border border-error px-4 py-3 text-[13px] font-semibold text-error transition hover:bg-error/10" type="submit" aria-label="Eliminar propuesta">
-                                    <span class="material-symbols-outlined text-[19px]">delete</span>
-                                    <span>Retirar</span>
-                                </button>
-                            </form>
-                        </div>
-                    </article>
-                @empty
-                    <div class="rounded-xl border border-dashed border-outline-variant p-8 text-center text-on-surface-variant">
-                        No hay propuestas registradas todavía.
-                    </div>
-                @endforelse
+            <div class="overflow-x-auto rounded-xl border border-outline-variant/20">
+                <table class="w-full min-w-[760px] text-left">
+                    <thead class="bg-surface-container-low text-[12px] font-bold uppercase tracking-wide text-on-surface-variant">
+                        <tr>
+                            <th class="px-4 py-3">Propuesta</th>
+                            <th class="px-4 py-3">Categoría</th>
+                            <th class="px-4 py-3">Orden</th>
+                            <th class="px-4 py-3">Estado</th>
+                            <th class="px-4 py-3 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="proposal-list" class="bg-white" data-sortable-list data-reorder-url="{{ route('dashboard.reorder', 'propuestas') }}">
+                        @foreach ($proposals as $proposal)
+                            @include('dashboard.partials.proposal-row', ['proposal' => $proposal, 'defaultImage' => $defaultImage])
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </section>
 
-        <section class="campaign-card p-6 md:p-8">
+        <section class="campaign-card p-6 md:p-8" x-show="dashboardPanel === 'regidores'" x-cloak>
             <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div class="flex items-center gap-3">
                     <span class="material-symbols-outlined text-primary">groups</span>
-                    <h2 class="font-headline text-[24px] font-bold text-on-surface">Configurar regidores</h2>
+                    <div>
+                        <h2 class="font-headline text-[24px] font-bold text-on-surface">Regidores</h2>
+                        <p class="text-[13px] text-on-surface-variant">Gestiona nombres, cargos, fotos y visibilidad.</p>
+                    </div>
                 </div>
+                <button class="campaign-button-primary justify-center" type="button" data-open-modal="council-modal" data-mode="create" data-action="{{ route('dashboard.council.store') }}" data-append="#council-list">
+                    <span class="material-symbols-outlined text-[20px]">person_add</span>
+                    Nuevo regidor
+                </button>
             </div>
 
-            <form class="mb-6 grid gap-4 rounded-xl border border-dashed border-outline-variant p-5 md:grid-cols-4" method="POST" action="{{ route('dashboard.council.store') }}" enctype="multipart/form-data" data-ajax-form data-append="#council-list">
-                @csrf
-                <input name="name" class="campaign-input bg-white" placeholder="Nombre completo" required>
-                <input name="position" class="campaign-input bg-white" placeholder="Cargo">
-                <input name="sort_order" type="number" min="0" class="campaign-input bg-white" placeholder="Orden">
-                <input name="photo" type="file" accept="image/*" class="campaign-input bg-white">
-                <textarea name="bio" class="campaign-input bg-white md:col-span-3" rows="2" placeholder="Descripción breve"></textarea>
-                <label class="flex items-center gap-3 text-sm font-semibold text-on-surface-variant">
-                    <input class="h-5 w-5 rounded border-outline text-primary focus:ring-primary" name="active" type="checkbox" value="1" checked>
-                    Mostrar
-                </label>
-                <button class="campaign-button-primary text-sm md:col-span-4" type="submit">
-                    <span class="material-symbols-outlined text-[20px]">add</span>
-                    Agregar regidor
-                </button>
-            </form>
-
-            <div id="council-list" class="space-y-5">
-                @foreach ($councilMembers as $member)
-                    @include('dashboard.partials.council-member', ['member' => $member, 'defaultImage' => $defaultImage])
-                @endforeach
+            <div class="overflow-x-auto rounded-xl border border-outline-variant/20">
+                <table class="w-full min-w-[820px] text-left">
+                    <thead class="bg-surface-container-low text-[12px] font-bold uppercase tracking-wide text-on-surface-variant">
+                        <tr>
+                            <th class="px-4 py-3">Regidor</th>
+                            <th class="px-4 py-3">Descripción</th>
+                            <th class="px-4 py-3">Orden</th>
+                            <th class="px-4 py-3">Estado</th>
+                            <th class="px-4 py-3 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="council-list" class="bg-white" data-sortable-list data-reorder-url="{{ route('dashboard.reorder', 'regidores') }}">
+                        @foreach ($councilMembers as $member)
+                            @include('dashboard.partials.council-row', ['member' => $member, 'defaultImage' => $defaultImage])
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </section>
 
-        <section class="campaign-card p-6 md:p-8">
+        <section class="campaign-card p-6 md:p-8" x-show="dashboardPanel === 'galeria'" x-cloak>
             <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div class="flex items-center gap-3">
                     <span class="material-symbols-outlined text-primary">photo_library</span>
-                    <h2 class="font-headline text-[24px] font-bold text-on-surface">Fotos del distrito</h2>
+                    <div>
+                        <h2 class="font-headline text-[24px] font-bold text-on-surface">Galería del distrito</h2>
+                        <p class="text-[13px] text-on-surface-variant">Sube fotos con previsualización y ordena como se mostrarán.</p>
+                    </div>
                 </div>
-            </div>
-
-            <form class="mb-6 grid gap-4 rounded-xl border border-dashed border-outline-variant p-5 md:grid-cols-4" method="POST" action="{{ route('dashboard.district.store') }}" enctype="multipart/form-data" data-ajax-form data-append="#district-list">
-                @csrf
-                <input name="title" class="campaign-input bg-white" placeholder="Título">
-                <select name="layout" class="campaign-input bg-white">
-                    <option value="featured">Destacada</option>
-                    <option value="small" selected>Pequeña</option>
-                    <option value="wide">Ancha</option>
-                </select>
-                <input name="sort_order" type="number" min="0" class="campaign-input bg-white" placeholder="Orden">
-                <input name="image" type="file" accept="image/*" class="campaign-input bg-white">
-                <textarea name="description" class="campaign-input bg-white md:col-span-3" rows="2" placeholder="Descripción"></textarea>
-                <label class="flex items-center gap-3 text-sm font-semibold text-on-surface-variant">
-                    <input class="h-5 w-5 rounded border-outline text-primary focus:ring-primary" name="active" type="checkbox" value="1" checked>
-                    Mostrar
-                </label>
-                <button class="campaign-button-primary text-sm md:col-span-4" type="submit">
+                <button class="campaign-button-primary justify-center" type="button" data-open-modal="district-modal" data-mode="create" data-action="{{ route('dashboard.district.store') }}" data-append="#district-list">
                     <span class="material-symbols-outlined text-[20px]">add_photo_alternate</span>
                     Agregar foto
                 </button>
-            </form>
+            </div>
 
-            <div id="district-list" class="space-y-5">
+            <div id="district-list" class="grid gap-5 md:grid-cols-2 xl:grid-cols-3" data-sortable-list data-reorder-url="{{ route('dashboard.reorder', 'galeria') }}">
                 @foreach ($districtImages as $image)
-                    @include('dashboard.partials.district-image', ['image' => $image, 'defaultImage' => $defaultImage])
+                    @include('dashboard.partials.district-card', ['image' => $image, 'defaultImage' => $defaultImage])
                 @endforeach
             </div>
         </section>
 
-        <section class="campaign-card p-6 md:p-8">
+        <section class="campaign-card p-6 md:p-8" x-show="dashboardPanel === 'transparencia'" x-cloak>
             <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div class="flex items-center gap-3">
                     <span class="material-symbols-outlined text-primary">account_balance_wallet</span>
-                    <h2 class="font-headline text-[24px] font-bold text-on-surface">Transparencia de aportes</h2>
+                    <div>
+                        <h2 class="font-headline text-[24px] font-bold text-on-surface">Transparencia de aportes</h2>
+                        <p class="text-[13px] text-on-surface-variant">Registro público de aportantes, montos y detalles.</p>
+                    </div>
                 </div>
+                <button class="campaign-button-primary justify-center" type="button" data-open-modal="contribution-modal" data-mode="create" data-action="{{ route('dashboard.contributions.store') }}" data-append="#contribution-list">
+                    <span class="material-symbols-outlined text-[20px]">add</span>
+                    Nuevo aporte
+                </button>
             </div>
 
-            <form class="mb-6 grid gap-4 rounded-xl border border-dashed border-outline-variant p-5 md:grid-cols-4" method="POST" action="{{ route('dashboard.contributions.store') }}" data-ajax-form data-append="#contributions-list">
+            <div class="overflow-x-auto rounded-xl border border-outline-variant/20">
+                <table class="w-full min-w-[820px] text-left">
+                    <thead class="bg-surface-container-low text-[12px] font-bold uppercase tracking-wide text-on-surface-variant">
+                        <tr>
+                            <th class="px-4 py-3">Aportante</th>
+                            <th class="px-4 py-3">Tipo</th>
+                            <th class="px-4 py-3">Monto</th>
+                            <th class="px-4 py-3">Fecha</th>
+                            <th class="px-4 py-3">Orden</th>
+                            <th class="px-4 py-3">Estado</th>
+                            <th class="px-4 py-3 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="contribution-list" class="bg-white" data-sortable-list data-reorder-url="{{ route('dashboard.reorder', 'transparencia') }}">
+                        @foreach ($contributions as $contribution)
+                            @include('dashboard.partials.contribution-row', ['contribution' => $contribution])
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <div id="proposal-modal" class="fixed inset-0 z-[85] hidden items-center justify-center bg-primary/20 p-4 backdrop-blur-sm" data-admin-modal>
+        <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
+            <div class="mb-5 flex items-center justify-between">
+                <h3 class="font-headline text-2xl font-extrabold text-primary" data-modal-title>Propuesta</h3>
+                <button class="rounded-lg p-2 text-on-surface-variant hover:bg-surface-container" type="button" data-close-modal>
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form class="grid gap-4 md:grid-cols-2" method="POST" enctype="multipart/form-data" data-modal-form data-ajax-form>
                 @csrf
+                <input type="hidden" name="_method" value="POST" data-method-field>
+                <input type="hidden" name="image_path">
+                <label class="group flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 p-5 text-center transition hover:bg-primary/10 md:col-span-2" data-drop-zone>
+                    <img class="mb-3 hidden h-28 w-44 rounded-xl object-cover" data-image-preview alt="Imagen de la propuesta">
+                    <span class="material-symbols-outlined text-4xl text-primary">add_photo_alternate</span>
+                    <span class="mt-2 text-[15px] font-bold text-primary">Imagen de la propuesta</span>
+                    <span class="mt-1 text-[13px] text-on-surface-variant">Arrastra una imagen o haz clic para subir.</span>
+                    <input name="image" type="file" accept="image/*" class="sr-only" data-preview-input>
+                </label>
+                <div>
+                    <label class="campaign-label">Título</label>
+                    <input name="title" class="campaign-input bg-white" required>
+                </div>
+                <div>
+                    <label class="campaign-label">Categoría</label>
+                    <input name="category" class="campaign-input bg-white">
+                </div>
+                <div>
+                    <label class="campaign-label">Icono</label>
+                    <input name="icon" class="campaign-input bg-white" placeholder="water_drop">
+                </div>
+                <div>
+                    <label class="campaign-label">Orden</label>
+                    <input name="sort_order" type="number" min="0" class="campaign-input bg-white">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="campaign-label">Descripción</label>
+                    <textarea name="summary" rows="3" class="campaign-input bg-white"></textarea>
+                </div>
+                <label class="flex items-center gap-3 text-sm font-semibold text-on-surface-variant">
+                    <input class="h-5 w-5 rounded border-outline text-primary focus:ring-primary" name="active" type="checkbox" value="1" checked>
+                    Mostrar en landing
+                </label>
+                <label class="flex items-center gap-3 text-sm font-semibold text-on-surface-variant">
+                    <input class="h-5 w-5 rounded border-outline text-primary focus:ring-primary" name="is_featured" type="checkbox" value="1">
+                    Destacada
+                </label>
+                <button class="campaign-button-primary justify-center md:col-span-2" type="submit">
+                    <span class="material-symbols-outlined text-[20px]">save</span>
+                    Guardar propuesta
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="council-modal" class="fixed inset-0 z-[85] hidden items-center justify-center bg-primary/20 p-4 backdrop-blur-sm" data-admin-modal>
+        <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
+            <div class="mb-5 flex items-center justify-between">
+                <h3 class="font-headline text-2xl font-extrabold text-primary" data-modal-title>Regidor</h3>
+                <button class="rounded-lg p-2 text-on-surface-variant hover:bg-surface-container" type="button" data-close-modal>
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form class="grid gap-4 md:grid-cols-2" method="POST" enctype="multipart/form-data" data-modal-form data-ajax-form>
+                @csrf
+                <input type="hidden" name="_method" value="POST" data-method-field>
+                <label class="group flex min-h-40 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 p-5 text-center transition hover:bg-primary/10 md:col-span-2" data-drop-zone>
+                    <img class="mb-3 hidden h-24 w-24 rounded-full object-cover" data-image-preview alt="Foto del regidor">
+                    <span class="material-symbols-outlined text-4xl text-primary">add_a_photo</span>
+                    <span class="mt-2 text-[15px] font-bold text-primary">Foto del regidor</span>
+                    <span class="mt-1 text-[13px] text-on-surface-variant">Arrastra una foto o haz clic para subir.</span>
+                    <input name="photo" type="file" accept="image/*" class="sr-only" data-preview-input>
+                </label>
+                <input name="name" class="campaign-input bg-white" placeholder="Nombre completo" required>
+                <input name="position" class="campaign-input bg-white" placeholder="Cargo">
+                <input name="sort_order" type="number" min="0" class="campaign-input bg-white" placeholder="Orden">
+                <textarea name="bio" class="campaign-input bg-white md:col-span-2" rows="3" placeholder="Descripción breve"></textarea>
+                <label class="flex items-center gap-3 text-sm font-semibold text-on-surface-variant">
+                    <input class="h-5 w-5 rounded border-outline text-primary focus:ring-primary" name="active" type="checkbox" value="1" checked>
+                    Mostrar en landing
+                </label>
+                <button class="campaign-button-primary justify-center md:col-span-2" type="submit">
+                    <span class="material-symbols-outlined text-[20px]">save</span>
+                    Guardar regidor
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="district-modal" class="fixed inset-0 z-[85] hidden items-center justify-center bg-primary/20 p-4 backdrop-blur-sm" data-admin-modal>
+        <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
+            <div class="mb-5 flex items-center justify-between">
+                <h3 class="font-headline text-2xl font-extrabold text-primary" data-modal-title>Foto del distrito</h3>
+                <button class="rounded-lg p-2 text-on-surface-variant hover:bg-surface-container" type="button" data-close-modal>
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form class="grid gap-4 md:grid-cols-2" method="POST" enctype="multipart/form-data" data-modal-form data-ajax-form>
+                @csrf
+                <input type="hidden" name="_method" value="POST" data-method-field>
+                <input type="hidden" name="image_path">
+                <label class="group flex min-h-48 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 p-6 text-center transition hover:bg-primary/10 md:col-span-2" data-drop-zone>
+                    <img class="mb-4 hidden h-28 w-44 rounded-xl object-cover" data-image-preview alt="Vista previa">
+                    <span class="material-symbols-outlined text-4xl text-primary group-has-[img:not(.hidden)]:hidden">cloud_upload</span>
+                    <span class="mt-2 text-[15px] font-bold text-primary">Arrastra una foto o haz clic para subir</span>
+                    <span class="mt-1 text-[13px] text-on-surface-variant">JPG, PNG o WEBP hasta 4MB.</span>
+                    <input name="image" type="file" accept="image/*" class="sr-only" data-preview-input>
+                </label>
+                <input name="title" class="campaign-input bg-white" placeholder="Título">
+                <select name="layout" class="campaign-input bg-white">
+                    <option value="featured">Destacada</option>
+                    <option value="small">Pequeña</option>
+                    <option value="wide">Ancha</option>
+                </select>
+                <input name="sort_order" type="number" min="0" class="campaign-input bg-white" placeholder="Orden">
+                <label class="flex items-center gap-3 text-sm font-semibold text-on-surface-variant">
+                    <input class="h-5 w-5 rounded border-outline text-primary focus:ring-primary" name="active" type="checkbox" value="1" checked>
+                    Mostrar
+                </label>
+                <textarea name="description" class="campaign-input bg-white md:col-span-2" rows="3" placeholder="Descripción"></textarea>
+                <button class="campaign-button-primary justify-center md:col-span-2" type="submit">
+                    <span class="material-symbols-outlined text-[20px]">save</span>
+                    Guardar foto
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="contribution-modal" class="fixed inset-0 z-[85] hidden items-center justify-center bg-primary/20 p-4 backdrop-blur-sm" data-admin-modal>
+        <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
+            <div class="mb-5 flex items-center justify-between">
+                <h3 class="font-headline text-2xl font-extrabold text-primary" data-modal-title>Aporte</h3>
+                <button class="rounded-lg p-2 text-on-surface-variant hover:bg-surface-container" type="button" data-close-modal>
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form class="grid gap-4 md:grid-cols-2" method="POST" data-modal-form data-ajax-form>
+                @csrf
+                <input type="hidden" name="_method" value="POST" data-method-field>
+                <input type="hidden" name="currency" value="PEN">
                 <input name="contributor_name" class="campaign-input bg-white" placeholder="Aportante" required>
                 <input name="contribution_type" class="campaign-input bg-white" placeholder="Tipo">
                 <input name="amount" type="number" min="0" step="0.01" class="campaign-input bg-white" placeholder="Monto">
                 <input name="contribution_date" type="date" class="campaign-input bg-white">
-                <textarea name="detail" class="campaign-input bg-white md:col-span-3" rows="2" placeholder="Detalle"></textarea>
-                <input type="hidden" name="currency" value="PEN">
+                <input name="sort_order" type="number" min="0" class="campaign-input bg-white" placeholder="Orden">
+                <textarea name="detail" class="campaign-input bg-white md:col-span-2" rows="3" placeholder="Detalle"></textarea>
                 <label class="flex items-center gap-3 text-sm font-semibold text-on-surface-variant">
                     <input class="h-5 w-5 rounded border-outline text-primary focus:ring-primary" name="active" type="checkbox" value="1" checked>
-                    Mostrar
+                    Publicar
                 </label>
-                <button class="campaign-button-primary text-sm md:col-span-4" type="submit">
-                    <span class="material-symbols-outlined text-[20px]">add</span>
-                    Agregar aportante
+                <button class="campaign-button-primary justify-center md:col-span-2" type="submit">
+                    <span class="material-symbols-outlined text-[20px]">save</span>
+                    Guardar aporte
                 </button>
             </form>
-
-            <div id="contributions-list" class="space-y-5">
-                @foreach ($contributions as $contribution)
-                    @include('dashboard.partials.contribution', ['contribution' => $contribution])
-                @endforeach
-            </div>
-        </section>
+        </div>
     </div>
 
     <div id="campaign-swal" class="fixed inset-0 z-[90] hidden items-center justify-center bg-primary/20 p-4 backdrop-blur-sm">
@@ -304,10 +435,21 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         (() => {
             const modal = document.getElementById('campaign-swal');
             const showSwal = (message, title = 'Listo', icon = 'check_circle') => {
+                if (window.Swal) {
+                    return window.Swal.fire({
+                        title,
+                        text: message,
+                        icon: icon === 'error' ? 'error' : 'success',
+                        confirmButtonColor: '#073b82',
+                    });
+                }
+
                 modal.querySelector('[data-swal-title]').textContent = title;
                 modal.querySelector('[data-swal-message]').textContent = message;
                 modal.querySelector('[data-swal-icon]').textContent = icon;
@@ -315,9 +457,179 @@
                 modal.classList.add('flex');
             };
 
+            const confirmSwal = async (message) => {
+                if (window.Swal) {
+                    const result = await window.Swal.fire({
+                        title: 'Confirmar acción',
+                        text: message,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, retirar',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonColor: '#c5001a',
+                        cancelButtonColor: '#073b82',
+                    });
+
+                    return result.isConfirmed;
+                }
+
+                return confirm(message);
+            };
+
+            const decodeFill = (encoded) => {
+                if (!encoded) return {};
+
+                const bytes = Uint8Array.from(atob(encoded), (char) => char.charCodeAt(0));
+                return JSON.parse(new TextDecoder().decode(bytes));
+            };
+
             modal.querySelector('[data-swal-close]').addEventListener('click', () => {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
+            });
+
+            const closeAdminModal = (adminModal) => {
+                adminModal?.classList.add('hidden');
+                adminModal?.classList.remove('flex');
+            };
+
+            document.addEventListener('click', (event) => {
+                const closer = event.target.closest('[data-close-modal]');
+                if (closer) {
+                    closeAdminModal(closer.closest('[data-admin-modal]'));
+                    return;
+                }
+
+                const opener = event.target.closest('[data-open-modal]');
+                if (!opener) return;
+
+                const adminModal = document.getElementById(opener.dataset.openModal);
+                const form = adminModal.querySelector('[data-modal-form]');
+                const method = form.querySelector('[data-method-field]');
+                const fill = decodeFill(opener.dataset.fillB64);
+
+                form.reset();
+                form.action = opener.dataset.action;
+                form.dataset.append = opener.dataset.append || '';
+                form.dataset.replace = opener.dataset.replace || '';
+                method.value = opener.dataset.mode === 'edit' ? 'PATCH' : 'POST';
+                adminModal.querySelector('[data-modal-title]').textContent = opener.dataset.mode === 'edit' ? 'Editar registro' : 'Nuevo registro';
+
+                Object.entries(fill).forEach(([name, value]) => {
+                    const field = form.elements[name];
+                    if (!field) return;
+
+                    if (field.type === 'checkbox') {
+                        field.checked = Boolean(value);
+                    } else {
+                        field.value = value ?? '';
+                    }
+                });
+
+                const preview = form.querySelector('[data-image-preview]');
+                if (preview) {
+                    const currentImage = fill.image_path || '';
+                    if (currentImage) {
+                        preview.src = currentImage.startsWith('http') || currentImage.startsWith('data:') ? currentImage : `/${currentImage}`;
+                        preview.classList.remove('hidden');
+                    } else {
+                        preview.removeAttribute('src');
+                        preview.classList.add('hidden');
+                    }
+                }
+
+                adminModal.classList.remove('hidden');
+                adminModal.classList.add('flex');
+            });
+
+            document.addEventListener('change', (event) => {
+                const input = event.target.closest('[data-preview-input]');
+                if (!input || !input.files?.[0]) return;
+
+                const preview = input.closest('form').querySelector('[data-image-preview]');
+                preview.src = URL.createObjectURL(input.files[0]);
+                preview.classList.remove('hidden');
+            });
+
+            document.querySelectorAll('[data-drop-zone]').forEach((zone) => {
+                const input = zone.querySelector('[data-preview-input]');
+
+                zone.addEventListener('dragover', (event) => {
+                    event.preventDefault();
+                    zone.classList.add('border-primary', 'bg-primary/10');
+                });
+
+                zone.addEventListener('dragleave', () => {
+                    zone.classList.remove('border-primary', 'bg-primary/10');
+                });
+
+                zone.addEventListener('drop', (event) => {
+                    event.preventDefault();
+                    zone.classList.remove('border-primary', 'bg-primary/10');
+
+                    if (!event.dataTransfer.files?.length) return;
+
+                    input.files = event.dataTransfer.files;
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+            });
+
+            const refreshOrderLabels = (container, serverOrders = null) => {
+                const items = [...container.querySelectorAll('[data-sortable-item]')];
+
+                items.forEach((item, index) => {
+                    const label = item.querySelector('[data-order-label]');
+                    if (!label) return;
+
+                    label.textContent = serverOrders?.[item.dataset.id] ?? ((index + 1) * 10);
+                });
+            };
+
+            document.querySelectorAll('[data-sortable-list]').forEach((container) => {
+                if (!window.Sortable) return;
+
+                window.Sortable.create(container, {
+                    animation: 150,
+                    handle: '[data-drag-handle]',
+                    draggable: '[data-sortable-item]',
+                    ghostClass: 'opacity-40',
+                    chosenClass: 'bg-primary/5',
+                    dragClass: 'shadow-xl',
+                    onEnd: async () => {
+                        refreshOrderLabels(container);
+
+                        const items = [...container.querySelectorAll('[data-sortable-item]')]
+                            .map((item) => item.dataset.id)
+                            .filter(Boolean);
+
+                        try {
+                            const response = await fetch(container.dataset.reorderUrl, {
+                                method: 'PATCH',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Accept': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                },
+                                body: JSON.stringify({ items }),
+                            });
+
+                            const data = await response.json();
+
+                            if (!response.ok) {
+                                const firstError = data.errors ? Object.values(data.errors).flat()[0] : data.message;
+                                throw new Error(firstError || 'No se pudo actualizar el orden.');
+                            }
+
+                            refreshOrderLabels(container, data.orders || {});
+                            window.dispatchEvent(new CustomEvent('dashboard-saved', {
+                                detail: { message: data.message || 'Orden actualizado correctamente.' },
+                            }));
+                        } catch (error) {
+                            showSwal(error.message || 'No se pudo actualizar el orden.', 'Revisa los datos', 'error');
+                        }
+                    },
+                });
             });
 
             document.addEventListener('submit', async (event) => {
@@ -331,7 +643,7 @@
                 event.preventDefault();
                 event.stopImmediatePropagation();
 
-                if ((form.matches('[data-ajax-delete]') || isProposalDelete) && !confirm('¿Seguro que deseas retirar este registro?')) {
+                if ((form.matches('[data-ajax-delete]') || isProposalDelete) && !await confirmSwal('¿Seguro que deseas retirar este registro?')) {
                     return;
                 }
 
@@ -348,7 +660,14 @@
                         body: new FormData(form),
                     });
 
-                    const data = await response.json();
+                    const raw = await response.text();
+                    let data = {};
+
+                    try {
+                        data = raw ? JSON.parse(raw) : {};
+                    } catch (parseError) {
+                        throw new Error('El servidor devolvió una respuesta inesperada. Revisa la sesión o los datos enviados.');
+                    }
 
                     if (!response.ok) {
                         const firstError = data.errors ? Object.values(data.errors).flat()[0] : data.message;
@@ -372,6 +691,7 @@
                         document.querySelector(`#proposal-${proposalId}`)?.remove();
                     }
 
+                    closeAdminModal(form.closest('[data-admin-modal]'));
                     showSwal(data.message || 'Cambios guardados correctamente.');
                 } catch (error) {
                     showSwal(error.message, 'Revisa los datos', 'error');
