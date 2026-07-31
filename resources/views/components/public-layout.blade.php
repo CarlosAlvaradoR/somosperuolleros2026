@@ -247,7 +247,11 @@
                 </div>
             </div>
             <div class="border-t border-outline-variant/20 py-5 text-center text-sm text-on-surface-variant">
-                © 2026 Somos Peru Olleros. Todos los derechos reservados.
+                <p>© 2026 Somos Perú Olleros. Todos los derechos reservados.</p>
+                <p class="mt-2 text-[12px]">
+                    Desarrollado por
+                    <a class="font-bold text-primary transition hover:text-secondary hover:underline" href="http://ceartech.calvarador.com/" target="_blank" rel="noopener noreferrer">CEAR TECH INNOVATIONS</a>
+                </p>
             </div>
         </footer>
 
