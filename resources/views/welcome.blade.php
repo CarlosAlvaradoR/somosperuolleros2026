@@ -4,7 +4,7 @@
             <div class="space-y-8 md:col-span-7">
                 <span class="inline-flex items-center gap-2 rounded-full bg-secondary-fixed px-4 py-1.5 text-[14px] font-semibold uppercase leading-[1.2] tracking-[0.05em] text-secondary">
                     <span class="h-2 w-2 rounded-full bg-secondary"></span>
-                    Candidato a Alcalde 2024
+                    Candidato a Alcalde 2026
                 </span>
 
                 <div class="space-y-6">
@@ -62,6 +62,14 @@
                 <p class="mt-4 text-lg leading-8 text-on-surface-variant">
                     Tres ejes de trabajo para transformar la calidad de vida del distrito con obras, acompanamiento y transparencia.
                 </p>
+                <button
+                    class="mt-8 inline-flex items-center gap-2 rounded-xl bg-primary px-8 py-4 text-[14px] font-semibold leading-[1.2] tracking-[0.05em] text-on-primary transition hover:bg-secondary active:scale-[0.98]"
+                    type="button"
+                    x-on:click="showAlert('Recurso no disponible', 'El PDF completo del plan de gobierno aún no está disponible para descarga pública. Mientras tanto, puedes consultar las propuestas desde esta sección o preguntarle al asistente virtual.', 'info', 'download')"
+                >
+                    <span class="material-symbols-outlined">download</span>
+                    Descargar Propuestas en PDF
+                </button>
             </div>
 
             <div class="grid gap-6 md:grid-cols-3">
@@ -110,6 +118,56 @@
                         <p class="mt-2 px-4 leading-[1.6] text-on-surface-variant">{{ $copy }}</p>
                     </article>
                 @endforeach
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-surface py-16 md:py-28">
+        <div class="campaign-container space-y-12">
+            <div class="space-y-4 text-center">
+                <h2 class="font-headline text-4xl font-extrabold text-primary">Equipo Técnico</h2>
+                <p class="mx-auto max-w-2xl text-lg leading-8 text-on-surface-variant">Especialistas comprometidos con el desarrollo técnico y profesional de Olleros.</p>
+            </div>
+
+            <div class="grid gap-8 sm:grid-cols-3">
+                @foreach ([
+                    ['Juan Mendoza', 'Coordinador de Base', 'Ingeniero Civil con amplia experiencia en organización comunitaria y desarrollo local.', 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgcng9IjgiIGZpbGw9IiNlOGVhZWQiLz48cGF0aCBkPSJNMTcwIDEzMCBsMzAgNDAgbDIwLTE1IGw0MCA1NSBIMTQweiIgZmlsbD0iI2JkYzFjNiIvPjxjaXJjbGUgY3g9IjI1MCIgY3k9IjEyMCIgcj0iMTgiIGZpbGw9IiNiZGMxYzYiLz48L3N2Zz4='],
+                    ['Luis Tinoco', 'Coordinador de Sedes', 'Ingeniero Agrónomo especializado en gestión de infraestructura y logística rural.', 'https://lh3.googleusercontent.com/aida-public/AB6AXuAHgCrUmOWo1qfHSy-4zCo8rrxJJ2gqaBgvhjL7gu7mXQC1KWeB1jzNL2y71GBLv7EZiBrRuiZPGvd3blZdbETxYYX5bPLge0jSmeV3D5FlpQWi2-WzzXY7KoF9quubDDuslH6jvLudjCLCtN0IwUyacYqfrv3a5lazTPgXBo5RiNuqtcqD4bml0O0jcNCfASQd5vomUxOhopC5h109eY_wh3aWwEdORh7kfxaVov0Uw-r-A87pcNfk59koiaUAU7G3vpeuwbAlTg'],
+                    ['Ana Valdivia', 'Coordinadora de Plan de Gobierno', 'Gestora Pública experta en diseño de políticas municipales y transparencia.', 'https://lh3.googleusercontent.com/aida-public/AB6AXuDalZJjYC4JTdjtcRqYppi5BJgRSI1Q7DXMDrKyyXCsT7pG9P9nBSKLHYXyZfotQ4P_tPVQCisd16HRyv3IKYdj2EPsmahspsZMa-XWuYUTAAwSQNZeDKtwMfTpNk4K6zte9N1fYxysIPuxeamQuJyWI80WIetSGroSDnzyyk7D88kNN-rNwKpdMam8dwFwK8NJwmIH9v8MufFbDxC0FDn2f3Y5oa7cz1K_H_UPJoNOpqPEuNSBQcExvvzBhEdBeAZ9UrR_dwh_FA'],
+                ] as [$member, $role, $copy, $photo])
+                    <article class="group text-center">
+                        <div class="mb-6 aspect-square overflow-hidden rounded-[32px] shadow-[0px_10px_40px_rgba(33,68,139,0.06)] grayscale transition duration-200 group-hover:grayscale-0">
+                            <img class="h-full w-full object-cover" src="{{ $photo }}" alt="{{ $member }}">
+                        </div>
+                        <p class="mb-1 text-[14px] font-semibold uppercase leading-[1.2] tracking-[0.05em] text-secondary">{{ $role }}</p>
+                        <h3 class="font-headline text-[24px] font-semibold leading-[1.3] text-primary">{{ $member }}</h3>
+                        <p class="mt-2 px-4 leading-[1.6] text-on-surface-variant">{{ $copy }}</p>
+                    </article>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-surface-container-lowest py-16 md:py-28">
+        <div class="campaign-container">
+            <div class="mb-16 space-y-4 text-center">
+                <h2 class="font-headline text-4xl font-extrabold text-primary">En el distrito</h2>
+                <p class="mx-auto max-w-2xl text-lg leading-8 text-on-surface-variant">Imágenes de nuestras jornadas de diálogo y trabajo en las diversas comunidades de Olleros.</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+                <div class="col-span-2 row-span-2 overflow-hidden rounded-3xl shadow-[0px_10px_40px_rgba(33,68,139,0.06)]">
+                    <img class="h-full w-full cursor-pointer object-cover transition duration-300 hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhvx8BI88fuvxfyTbMgUUSUR4wJamKwLJIdAiGNlbvFgQNVNgFx4IWct-_JHKMzBRd0gvRz-SP7DvIRDrWzfJ6ffIRN_QOhSNtPqR6VTcRaAK2Ct8tLZIC7wrZI3sTKMye9aXUnUOK1cjqBbZKX6y7VzniWdHB4YV9Wj6Y5abhJcEvsiOcTpQ76fv53DA_LnB-ZDgyZfzKGenHBpTcEl5OVkiC-StI0MUpipWDE26Ka7jYVZXJDOfvfcu-fKvi9khSzKJxU1o1rQ" alt="Jornada de diálogo en Olleros">
+                </div>
+                <div class="h-48 overflow-hidden rounded-3xl shadow-[0px_10px_40px_rgba(33,68,139,0.06)] md:h-full">
+                    <img class="h-full w-full cursor-pointer object-cover transition duration-300 hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDalZJjYC4JTdjtcRqYppi5BJgRSI1Q7DXMDrKyyXCsT7pG9P9nBSKLHYXyZfotQ4P_tPVQCisd16HRyv3IKYdj2EPsmahspsZMa-XWuYUTAAwSQNZeDKtwMfTpNk4K6zte9N1fYxysIPuxeamQuJyWI80WIetSGroSDnzyyk7D88kNN-rNwKpdMam8dwFwK8NJwmIH9v8MufFbDxC0FDn2f3Y5oa7cz1K_H_UPJoNOpqPEuNSBQcExvvzBhEdBeAZ9UrR_dwh_FA" alt="Saludo con vecinos de Olleros">
+                </div>
+                <div class="h-48 overflow-hidden rounded-3xl shadow-[0px_10px_40px_rgba(33,68,139,0.06)] md:h-full">
+                    <img class="h-full w-full cursor-pointer object-cover transition duration-300 hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhQg7J9iBM4WwQftWaJD1P3QMCkgRfmPdRVvtxIj662OPzrbRLkKz58w6v6c9ILIs8SPKBEbq8K4xWH8VwLNhBygcsG649lCWOjgJ1gi5GxfBoaIyulSE5D1Eb1b71zszNHA1rhbc1TAK3LvydQYyHVuJPVPPtWEi9wfxRnqGnQeYohkTMM8py4J7i6SoBEZJNcz8igg5s7QQhKpmjnKwUY7p-1-xOnqijd_kh9FnLDftxkorbmklX07hDUAylJ0c9sD5i6dl33A" alt="Taller con jóvenes de Olleros">
+                </div>
+                <div class="col-span-2 h-64 overflow-hidden rounded-3xl shadow-[0px_10px_40px_rgba(33,68,139,0.06)]">
+                    <img class="h-full w-full cursor-pointer object-cover transition duration-300 hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHgCrUmOWo1qfHSy-4zCo8rrxJJ2gqaBgvhjL7gu7mXQC1KWeB1jzNL2y71GBLv7EZiBrRuiZPGvd3blZdbETxYYX5bPLge0jSmeV3D5FlpQWi2-WzzXY7KoF9quubDDuslH6jvLudjCLCtN0IwUyacYqfrv3a5lazTPgXBo5RiNuqtcqD4bml0O0jcNCfASQd5vomUxOhopC5h109eY_wh3aWwEdORh7kfxaVov0Uw-r-A87pcNfk59koiaUAU7G3vpeuwbAlTg" alt="Campo agrícola de Olleros">
+                </div>
             </div>
         </div>
     </section>
@@ -176,9 +234,9 @@
                     </thead>
                     <tbody class="divide-y divide-outline-variant/30">
                         @foreach ([
-                            ['Asociacion de Productores', 'Materiales', '1000 volantes', '15 Oct 2024'],
-                            ['Comite Vecinal Barrio Centro', 'Organizacion', 'Sede para reunion', '12 Oct 2024'],
-                            ['Aporte voluntario individual', 'Economico', 'S/ 500.00', '10 Oct 2024'],
+                            ['Asociacion de Productores', 'Materiales', '1000 volantes', '15 Oct 2026'],
+                            ['Comite Vecinal Barrio Centro', 'Organizacion', 'Sede para reunion', '12 Oct 2026'],
+                            ['Aporte voluntario individual', 'Economico', 'S/ 500.00', '10 Oct 2026'],
                         ] as $row)
                             <tr class="hover:bg-primary/5">
                                 @foreach ($row as $cell)

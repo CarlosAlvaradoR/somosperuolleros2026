@@ -39,7 +39,7 @@
                 </nav>
 
                 <div class="absolute bottom-0 left-0 right-0 border-t border-outline-variant/20 p-6">
-                    <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-outline">Campana 2024</p>
+                    <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-outline">Campana 2026</p>
                 </div>
             </aside>
 
