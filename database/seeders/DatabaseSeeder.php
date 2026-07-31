@@ -15,11 +15,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Primero cargamos el contenido de campaña para que la landing tenga
+        // la misma información base de la maqueta desde el primer arranque.
+        $this->call(CampaignSiteSeeder::class);
+
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Usuario mínimo de acceso local. updateOrCreate evita duplicados si se
+        // vuelve a ejecutar db:seed durante desarrollo.
+        User::query()->updateOrCreate(
+            ['email' => 'test@example.com'],
+            ['name' => 'Test User', 'password' => 'password']
+        );
     }
 }
