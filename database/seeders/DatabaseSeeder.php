@@ -24,8 +24,8 @@ class DatabaseSeeder extends Seeder
         // Usuario mínimo de acceso local. updateOrCreate evita duplicados si se
         // vuelve a ejecutar db:seed durante desarrollo.
         User::query()->updateOrCreate(
-            ['email' => 'test@example.com'],
-            ['name' => 'Test User', 'password' => 'password']
+            ['email' => 'adminsomosperu@somosperu.com'],
+            ['name' => 'Mirko Cacha', 'password' => '12345678']
         );
     }
 }
