@@ -7,6 +7,16 @@
         <title>{{ $title ?? config('app.name', 'Somos Peru Olleros') }}</title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
+    @php
+        $layoutSections = isset($sections)
+            ? $sections
+            : \Illuminate\Support\Facades\DB::table('site_sections')
+                ->whereNull('deleted_at')
+                ->where('active', true)
+                ->get()
+                ->keyBy('key');
+        $layoutSectionVisible = fn (string $key) => ! $layoutSections->has($key) || (bool) $layoutSections->get($key)->is_visible;
+    @endphp
     <body x-data="campaignChat()" class="min-h-screen bg-background text-on-surface">
         <div class="fixed inset-0 z-[70] flex items-center justify-center bg-primary/20 p-4 backdrop-blur-sm" x-show="alertOpen" x-cloak x-transition>
             <div class="w-full max-w-sm rounded-[28px] border border-outline-variant/30 bg-white p-7 text-center shadow-2xl" x-on:click.outside="alertOpen = false">
@@ -21,6 +31,7 @@
             </div>
         </div>
 
+        @if ($layoutSectionVisible('copa_olleros'))
         <div class="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" x-show="footballModal" x-cloak x-transition>
             <div class="relative max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-[32px] bg-surface shadow-2xl" x-on:click.outside="footballModal = false">
                 <button class="absolute right-6 top-6 flex h-10 w-10 items-center justify-center rounded-full text-on-surface-variant transition hover:bg-surface-variant" type="button" x-on:click="footballModal = false" aria-label="Cerrar">
@@ -77,30 +88,43 @@
                 </div>
             </div>
         </div>
+        @endif
 
         <header class="fixed left-0 right-0 top-0 z-50 h-20 bg-surface/80 shadow-[0px_10px_40px_rgba(33,68,139,0.06)] backdrop-blur-md">
             <div class="mx-auto flex h-full w-full max-w-[1200px] items-center justify-between px-5 md:px-6">
                 <x-campaign-logo />
 
                 <nav class="hidden items-center gap-6 md:flex lg:gap-8">
-                    <a class="text-[14px] font-semibold leading-[1.2] tracking-[0.05em] text-on-surface-variant transition hover:text-secondary" href="{{ route('landing') }}#biografia">Quién es</a>
-                    <a class="text-[14px] font-semibold leading-[1.2] tracking-[0.05em] text-on-surface-variant transition hover:text-secondary" href="{{ route('landing') }}#plan">Plan de Gobierno</a>
-                    <a class="text-[14px] font-semibold leading-[1.2] tracking-[0.05em] text-on-surface-variant transition hover:text-secondary" href="{{ route('landing') }}#regidores">Regidores</a>
-                    <a class="text-[14px] font-semibold leading-[1.2] tracking-[0.05em] text-on-surface-variant transition hover:text-secondary" href="{{ route('landing') }}#contacto">Contacto</a>
-                    <button class="group relative flex items-center gap-1 text-[14px] font-bold leading-[1.2] tracking-[0.05em] text-secondary transition hover:text-primary" type="button" x-on:click="footballModal = true">
-                        <span class="material-symbols-outlined text-[18px]">sports_soccer</span>
-                        Copa Olleros
-                        <span class="absolute -right-3 -top-3 animate-pulse rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-bold uppercase text-on-primary">Nuevo</span>
-                    </button>
+                    @if ($layoutSectionVisible('biografia'))
+                        <a class="text-[13px] font-semibold leading-[1.2] tracking-[0.04em] text-on-surface-variant transition hover:text-secondary" href="{{ route('landing') }}#biografia">Quién es</a>
+                    @endif
+                    @if ($layoutSectionVisible('plan'))
+                        <a class="text-[13px] font-semibold leading-[1.2] tracking-[0.04em] text-on-surface-variant transition hover:text-secondary" href="{{ route('landing') }}#plan">Plan de Gobierno</a>
+                    @endif
+                    @if ($layoutSectionVisible('regidores'))
+                        <a class="text-[13px] font-semibold leading-[1.2] tracking-[0.04em] text-on-surface-variant transition hover:text-secondary" href="{{ route('landing') }}#regidores">Regidores</a>
+                    @endif
+                    @if ($layoutSectionVisible('contacto'))
+                        <a class="text-[13px] font-semibold leading-[1.2] tracking-[0.04em] text-on-surface-variant transition hover:text-secondary" href="{{ route('landing') }}#contacto">Contacto</a>
+                    @endif
+                    @if ($layoutSectionVisible('copa_olleros'))
+                        <button class="group relative flex items-center gap-1 text-[14px] font-bold leading-[1.2] tracking-[0.05em] text-secondary transition hover:text-primary" type="button" x-on:click="footballModal = true">
+                            <span class="material-symbols-outlined text-[18px]">sports_soccer</span>
+                            Copa Olleros
+                            <span class="absolute -right-3 -top-3 animate-pulse rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-bold uppercase text-on-primary">Nuevo</span>
+                        </button>
+                    @endif
                 </nav>
 
                 <div class="hidden items-center gap-4 md:ml-8 md:flex lg:ml-10">
                     @auth
-                        <a class="px-4 text-[14px] font-semibold leading-[1.2] tracking-[0.05em] text-primary transition hover:text-secondary" href="{{ route('dashboard') }}">Dashboard</a>
+                        <a class="px-4 text-[13px] font-semibold leading-[1.2] tracking-[0.04em] text-primary transition hover:text-secondary" href="{{ route('dashboard') }}">Dashboard</a>
                     @else
-                        <a class="px-4 text-[14px] font-semibold leading-[1.2] tracking-[0.05em] text-primary transition hover:text-secondary" href="{{ route('login') }}">Iniciar Sesión</a>
+                        <a class="px-4 text-[13px] font-semibold leading-[1.2] tracking-[0.04em] text-primary transition hover:text-secondary" href="{{ route('login') }}">Iniciar Sesión</a>
                     @endauth
-                    <a class="rounded-lg bg-primary px-6 py-2.5 text-[14px] font-semibold leading-[1.2] tracking-[0.05em] text-on-primary transition hover:bg-secondary" href="{{ route('landing') }}#sumate">Súmate</a>
+                    @if ($layoutSectionVisible('sumate'))
+                        <a class="rounded-lg bg-primary px-6 py-2.5 text-[13px] font-semibold leading-[1.2] tracking-[0.04em] text-on-primary transition hover:bg-secondary" href="{{ route('landing') }}#sumate">Súmate</a>
+                    @endif
                 </div>
 
                 <button type="button" class="rounded-lg p-2 text-primary md:hidden" x-on:click="menuOpen = ! menuOpen" aria-label="Abrir menú">
@@ -110,17 +134,29 @@
 
             <div class="border-t border-outline-variant/20 bg-surface px-5 py-5 lg:hidden" x-show="menuOpen" x-transition>
                 <nav class="campaign-container flex flex-col gap-4 font-semibold text-on-surface-variant">
-                    <a href="{{ route('landing') }}#biografia">Quién es</a>
-                    <a href="{{ route('landing') }}#plan">Plan de Gobierno</a>
-                    <a href="{{ route('landing') }}#regidores">Regidores</a>
-                    <a href="{{ route('landing') }}#contacto">Contacto</a>
-                    <button class="text-left text-secondary" type="button" x-on:click="footballModal = true; menuOpen = false">Copa Olleros</button>
+                    @if ($layoutSectionVisible('biografia'))
+                        <a href="{{ route('landing') }}#biografia">Quién es</a>
+                    @endif
+                    @if ($layoutSectionVisible('plan'))
+                        <a href="{{ route('landing') }}#plan">Plan de Gobierno</a>
+                    @endif
+                    @if ($layoutSectionVisible('regidores'))
+                        <a href="{{ route('landing') }}#regidores">Regidores</a>
+                    @endif
+                    @if ($layoutSectionVisible('contacto'))
+                        <a href="{{ route('landing') }}#contacto">Contacto</a>
+                    @endif
+                    @if ($layoutSectionVisible('copa_olleros'))
+                        <button class="text-left text-secondary" type="button" x-on:click="footballModal = true; menuOpen = false">Copa Olleros</button>
+                    @endif
                     @auth
                         <a class="text-primary" href="{{ route('dashboard') }}">Dashboard</a>
                     @else
                         <a class="text-primary" href="{{ route('login') }}">Iniciar Sesión</a>
                     @endauth
-                    <a class="campaign-button-primary" href="{{ route('landing') }}#sumate">Súmate</a>
+                    @if ($layoutSectionVisible('sumate'))
+                        <a class="campaign-button-primary" href="{{ route('landing') }}#sumate">Súmate</a>
+                    @endif
                 </nav>
             </div>
         </header>
@@ -129,6 +165,7 @@
             {{ $slot }}
         </main>
 
+        @if ($layoutSectionVisible('chatbot'))
         <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end">
             <div class="mb-4 w-80 overflow-hidden rounded-3xl border border-outline-variant/30 bg-surface shadow-2xl md:w-96" x-show="chatOpen" x-cloak x-transition>
                 <div class="flex items-center justify-between bg-primary p-4 text-on-primary">
@@ -176,6 +213,7 @@
                 <span class="material-symbols-outlined text-[32px]">chat</span>
             </button>
         </div>
+        @endif
 
         <footer class="border-t border-outline-variant/30 bg-surface-container-low">
             <div class="campaign-container grid gap-10 py-16 md:grid-cols-[1.4fr_1fr_1fr]">
@@ -188,9 +226,15 @@
                 <div>
                     <h3 class="mb-4 font-headline text-lg font-bold text-primary">Enlaces</h3>
                     <div class="flex flex-col gap-3 text-on-surface-variant">
-                        <a class="hover:text-secondary" href="{{ route('landing') }}#plan">Propuestas</a>
-                        <a class="hover:text-secondary" href="{{ route('landing') }}#transparencia">Transparencia</a>
-                        <a class="hover:text-secondary" href="{{ route('landing') }}#sumate">Súmate</a>
+                        @if ($layoutSectionVisible('plan'))
+                            <a class="hover:text-secondary" href="{{ route('landing') }}#plan">Propuestas</a>
+                        @endif
+                        @if ($layoutSectionVisible('transparencia'))
+                            <a class="hover:text-secondary" href="{{ route('landing') }}#transparencia">Transparencia</a>
+                        @endif
+                        @if ($layoutSectionVisible('sumate'))
+                            <a class="hover:text-secondary" href="{{ route('landing') }}#sumate">Súmate</a>
+                        @endif
                     </div>
                 </div>
                 <div>

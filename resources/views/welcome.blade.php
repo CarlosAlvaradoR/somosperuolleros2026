@@ -1,4 +1,50 @@
 <x-public-layout title="Somos Peru | Mirko Cacha">
+    @php
+        $sectionVisible = fn (string $key) => ! isset($sections) || ! $sections->has($key) || (bool) $sections->get($key)->is_visible;
+        $imageUrl = fn (?string $path) => $path && (str_starts_with($path, 'http') || str_starts_with($path, 'data:')) ? $path : ($path ? asset($path) : '');
+        $proposalItems = isset($proposals) && $proposals->isNotEmpty()
+            ? $proposals
+            : collect([
+                (object) ['icon' => 'water_drop', 'title' => 'Agua y saneamiento', 'summary' => 'Agua potable de calidad y saneamiento digno para los centros poblados.'],
+                (object) ['icon' => 'agriculture', 'title' => 'Agricultura y riego', 'summary' => 'Canales tecnificados, apoyo al productor y asistencia tecnica permanente.'],
+                (object) ['icon' => 'school', 'title' => 'Educacion', 'summary' => 'Infraestructura moderna y programas de oportunidades para jovenes.'],
+                (object) ['icon' => 'local_hospital', 'title' => 'Salud', 'summary' => 'Atencion preventiva, postas fortalecidas y campanas medicas descentralizadas.'],
+                (object) ['icon' => 'route', 'title' => 'Caminos', 'summary' => 'Mantenimiento vial para conectar comunidades, chacras y mercados.'],
+                (object) ['icon' => 'account_balance_wallet', 'title' => 'Transparencia', 'summary' => 'Aportes, gastos y avances publicados para todos los vecinos.'],
+            ]);
+        $councilItems = isset($councilMembers) && $councilMembers->isNotEmpty()
+            ? $councilMembers
+            : collect([
+                (object) ['name' => 'Carmen Rojas', 'position' => 'Primera Regidora', 'bio' => 'Ingeniera de Sistemas con especialidad en modernización del estado.', 'photo_path' => 'https://lh3.googleusercontent.com/aida-public/AB6AXuBQFhthJVk2oysLMe9NvFApkFB-Kr3TdvP6SwCdQcLShHOHyflhy2kSAyEwBzoqMUB4fU3T2eoMTwtFyEgompIJzg7K0lHqk4qSlaFVFyjr4M8eeH3FP24VKB5tS_PkBngyvRGpIIDDU8ksX7ime1Tgi8U1XICi6Qu66Wd8VZF18T_i_TuS0htk42Axja61XmEKuQYXAPhdzLLCPGFGl0dZqrvaSZWQcC-mbv-2eOiQEla_RmyyUE62KYuTEcocZaW-XW3qBbBcPA'],
+                (object) ['name' => 'Juan Huamán', 'position' => 'Segundo Regidor', 'bio' => 'Especialista agrario con experiencia en riego tecnificado.', 'photo_path' => 'https://lh3.googleusercontent.com/aida-public/AB6AXuBZPAWWn2JpegQV_OkUjFlpQRpimxixhmkngOnFzhmYjeCupLbn08-s00yAVRt25jZqTOzotYvtA6R73-w04dn6ParP3oOwiZcmUANS24V7Ky1EsC3ZRti7e8GzWxEZpkNNGPahFwy_w4vjsYFYJ2R01r1gEP_jtQiSPAugnwOO7JvijYE2LoiGoedU2IdIozNXfFL3n2x4EK603_mN_ihmBiIf3kL12NV8kLh5QBCcI3Hwtn1kMTGlrX_Fldlz-vHhyjnCS84ihw'],
+                (object) ['name' => 'Sofía Paredes', 'position' => 'Tercera Regidora', 'bio' => 'Abogada especialista en derecho administrativo y gestión municipal.', 'photo_path' => 'https://lh3.googleusercontent.com/aida-public/AB6AXuCJjWxvycLpoub4d8BjXZ_Wt_BHnHa8kR2F3bJxshBbxWqHnt0A_ERdtL3n_E4AgxbeX7UFvQBJpYJBJPj09C69v329-UYvMYwA0pKx8g38x7qssafMd0Jel_fUPnkTEACWgBYpIAArvgvWd1RKdMRi-oANZl286rjM94yAdAHGl6dSWv1-383av8OuNT3nl8F7nCPYdFbSsXpEHZe_PtcQT2Zxx_wpegqRR5g1tS-UqzfULOnYCNejVrVZV1qnE5bO42Mgbvh8Ew'],
+                (object) ['name' => 'Luis Castro', 'position' => 'Cuarto Regidor', 'bio' => 'Ingeniero Civil experto en infraestructura vial y saneamiento rural.', 'photo_path' => 'https://lh3.googleusercontent.com/aida-public/AB6AXuDEHZJZ4ZCfJ5d_x7UQUHFa44sVERu2gXHfDEuTcW3j4pk_TNxg7qGLzjjZfkC2BuIriAcvQWIr4G8KrxsyzIjkc3W9Yg6xuUx2IohP5o49ZNQSR8P_G7z9Yg_Izvp9QPmcN5VN1k1X9c3k5bjZD3uflDVbKkQR2WGnqK1IXCrMlMIggmGQYwtTU32oe620Q1G7qF1q7PRY1uaG55TaY9H8sSmQXLZkRVGYsBAvmrnBMUo3UDcNgvIGHcTe3H_aR8bDkedEcJch8w'],
+            ]);
+        $technicalItems = isset($technicalTeam) && $technicalTeam->isNotEmpty()
+            ? $technicalTeam
+            : collect([
+                (object) ['name' => 'Juan Mendoza', 'role' => 'Coordinador de Base', 'bio' => 'Ingeniero Civil con amplia experiencia en organización comunitaria y desarrollo local.', 'photo_path' => 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgcng9IjgiIGZpbGw9IiNlOGVhZWQiLz48cGF0aCBkPSJNMTcwIDEzMCBsMzAgNDAgbDIwLTE1IGw0MCA1NSBIMTQweiIgZmlsbD0iI2JkYzFjNiIvPjxjaXJjbGUgY3g9IjI1MCIgY3k9IjEyMCIgcj0iMTgiIGZpbGw9IiNiZGMxYzYiLz48L3N2Zz4='],
+                (object) ['name' => 'Luis Tinoco', 'role' => 'Coordinador de Sedes', 'bio' => 'Ingeniero Agrónomo especializado en gestión de infraestructura y logística rural.', 'photo_path' => 'https://lh3.googleusercontent.com/aida-public/AB6AXuAHgCrUmOWo1qfHSy-4zCo8rrxJJ2gqaBgvhjL7gu7mXQC1KWeB1jzNL2y71GBLv7EZiBrRuiZPGvd3blZdbETxYYX5bPLge0jSmeV3D5FlpQWi2-WzzXY7KoF9quubDDuslH6jvLudjCLCtN0IwUyacYqfrv3a5lazTPgXBo5RiNuqtcqD4bml0O0jcNCfASQd5vomUxOhopC5h109eY_wh3aWwEdORh7kfxaVov0Uw-r-A87pcNfk59koiaUAU7G3vpeuwbAlTg'],
+                (object) ['name' => 'Ana Valdivia', 'role' => 'Coordinadora de Plan de Gobierno', 'bio' => 'Gestora Pública experta en diseño de políticas municipales y transparencia.', 'photo_path' => 'https://lh3.googleusercontent.com/aida-public/AB6AXuDalZJjYC4JTdjtcRqYppi5BJgRSI1Q7DXMDrKyyXCsT7pG9P9nBSKLHYXyZfotQ4P_tPVQCisd16HRyv3IKYdj2EPsmahspsZMa-XWuYUTAAwSQNZeDKtwMfTpNk4K6zte9N1fYxysIPuxeamQuJyWI80WIetSGroSDnzyyk7D88kNN-rNwKpdMam8dwFwK8NJwmIH9v8MufFbDxC0FDn2f3Y5oa7cz1K_H_UPJoNOpqPEuNSBQcExvvzBhEdBeAZ9UrR_dwh_FA'],
+            ]);
+        $contributionItems = isset($contributions) && $contributions->isNotEmpty()
+            ? $contributions
+            : collect([
+                (object) ['contributor_name' => 'Asociacion de Productores', 'contribution_type' => 'Materiales', 'detail' => '1000 volantes', 'contribution_date' => '2026-10-15'],
+                (object) ['contributor_name' => 'Comite Vecinal Barrio Centro', 'contribution_type' => 'Organizacion', 'detail' => 'Sede para reunion', 'contribution_date' => '2026-10-12'],
+                (object) ['contributor_name' => 'Aporte voluntario individual', 'contribution_type' => 'Economico', 'detail' => 'S/ 500.00', 'contribution_date' => '2026-10-10'],
+            ]);
+        $districtItems = isset($districtImages) && $districtImages->isNotEmpty()
+            ? $districtImages
+            : collect([
+                (object) ['title' => 'Jornada de diálogo en Olleros', 'layout' => 'featured', 'image_path' => 'https://lh3.googleusercontent.com/aida-public/AB6AXuBhvx8BI88fuvxfyTbMgUUSUR4wJamKwLJIdAiGNlbvFgQNVNgFx4IWct-_JHKMzBRd0gvRz-SP7DvIRDrWzfJ6ffIRN_QOhSNtPqR6VTcRaAK2Ct8tLZIC7wrZI3sTKMye9aXUnUOK1cjqBbZKX6y7VzniWdHB4YV9Wj6Y5abhJcEvsiOcTpQ76fv53DA_LnB-ZDgyZfzKGenHBpTcEl5OVkiC-StI0MUpipWDE26Ka7jYVZXJDOfvfcu-fKvi9khSzKJxU1o1rQ'],
+                (object) ['title' => 'Saludo con vecinos de Olleros', 'layout' => 'small', 'image_path' => 'https://lh3.googleusercontent.com/aida-public/AB6AXuDalZJjYC4JTdjtcRqYppi5BJgRSI1Q7DXMDrKyyXCsT7pG9P9nBSKLHYXyZfotQ4P_tPVQCisd16HRyv3IKYdj2EPsmahspsZMa-XWuYUTAAwSQNZeDKtwMfTpNk4K6zte9N1fYxysIPuxeamQuJyWI80WIetSGroSDnzyyk7D88kNN-rNwKpdMam8dwFwK8NJwmIH9v8MufFbDxC0FDn2f3Y5oa7cz1K_H_UPJoNOpqPEuNSBQcExvvzBhEdBeAZ9UrR_dwh_FA'],
+                (object) ['title' => 'Taller con jóvenes de Olleros', 'layout' => 'small', 'image_path' => 'https://lh3.googleusercontent.com/aida-public/AB6AXuDhQg7J9iBM4WwQftWaJD1P3QMCkgRfmPdRVvtxIj662OPzrbRLkKz58w6v6c9ILIs8SPKBEbq8K4xWH8VwLNhBygcsG649lCWOjgJ1gi5GxfBoaIyulSE5D1Eb1b71zszNHA1rhbc1TAK3LvydQYyHVuJPVPPtWEi9wfxRnqGnQeYohkTMM8py4J7i6SoBEZJNcz8igg5s7QQhKpmjnKwUY7p-1-xOnqijd_kh9FnLDftxkorbmklX07hDUAylJ0c9sD5i6dl33A'],
+                (object) ['title' => 'Campo agrícola de Olleros', 'layout' => 'wide', 'image_path' => 'https://lh3.googleusercontent.com/aida-public/AB6AXuAHgCrUmOWo1qfHSy-4zCo8rrxJJ2gqaBgvhjL7gu7mXQC1KWeB1jzNL2y71GBLv7EZiBrRuiZPGvd3blZdbETxYYX5bPLge0jSmeV3D5FlpQWi2-WzzXY7KoF9quubDDuslH6jvLudjCLCtN0IwUyacYqfrv3a5lazTPgXBo5RiNuqtcqD4bml0O0jcNCfASQd5vomUxOhopC5h109eY_wh3aWwEdORh7kfxaVov0Uw-r-A87pcNfk59koiaUAU7G3vpeuwbAlTg'],
+            ]);
+    @endphp
+
+    @if ($sectionVisible('hero'))
     <section class="relative flex min-h-screen items-center overflow-hidden bg-background pt-20">
         <div class="mx-auto grid w-full max-w-[1200px] items-center gap-12 px-5 py-14 md:grid-cols-12 md:px-6">
             <div class="space-y-8 md:col-span-7">
@@ -30,7 +76,12 @@
             </div>
         </div>
     </section>
+    @endif
+    @unless ($sectionVisible('hero'))
+        <div class="h-20 bg-background"></div>
+    @endunless
 
+    @if ($sectionVisible('biografia'))
     <section id="biografia" class="bg-surface py-16 md:py-28">
         <div class="campaign-container grid items-center gap-12 md:grid-cols-2">
             <div class="relative order-2 md:order-1">
@@ -54,7 +105,9 @@
             </div>
         </div>
     </section>
+    @endif
 
+    @if ($sectionVisible('plan'))
     <section id="plan" class="bg-surface-container-low py-16 md:py-28">
         <div class="campaign-container">
             <div class="mx-auto mb-14 max-w-3xl text-center">
@@ -73,26 +126,21 @@
             </div>
 
             <div class="grid gap-6 md:grid-cols-3">
-                @foreach ([
-                    ['water_drop', 'Agua y saneamiento', 'Agua potable de calidad y saneamiento digno para los centros poblados.'],
-                    ['agriculture', 'Agricultura y riego', 'Canales tecnificados, apoyo al productor y asistencia tecnica permanente.'],
-                    ['school', 'Educacion', 'Infraestructura moderna y programas de oportunidades para jovenes.'],
-                    ['local_hospital', 'Salud', 'Atencion preventiva, postas fortalecidas y campanas medicas descentralizadas.'],
-                    ['route', 'Caminos', 'Mantenimiento vial para conectar comunidades, chacras y mercados.'],
-                    ['account_balance_wallet', 'Transparencia', 'Aportes, gastos y avances publicados para todos los vecinos.'],
-                ] as [$icon, $title, $copy])
+                @foreach ($proposalItems as $proposal)
                     <article class="campaign-card group p-8 transition duration-200 hover:-translate-y-1">
                         <div class="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-fixed text-primary transition group-hover:bg-primary group-hover:text-on-primary">
-                            <span class="material-symbols-outlined text-[30px]">{{ $icon }}</span>
+                            <span class="material-symbols-outlined text-[30px]">{{ $proposal->icon ?: 'flag' }}</span>
                         </div>
-                        <h3 class="font-headline text-xl font-bold text-primary">{{ $title }}</h3>
-                        <p class="mt-3 leading-7 text-on-surface-variant">{{ $copy }}</p>
+                        <h3 class="font-headline text-xl font-bold text-primary">{{ $proposal->title }}</h3>
+                        <p class="mt-3 leading-7 text-on-surface-variant">{{ $proposal->summary }}</p>
                     </article>
                 @endforeach
             </div>
         </div>
     </section>
+    @endif
 
+    @if ($sectionVisible('regidores'))
     <section id="regidores" class="bg-surface py-16 md:py-28">
         <div class="campaign-container">
             <div class="mb-12 flex flex-col justify-between gap-4 md:flex-row md:items-end">
@@ -103,25 +151,22 @@
                 <a class="campaign-button-outline" href="#contacto">Contactar equipo</a>
             </div>
             <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                @foreach ([
-                    ['Carmen Rojas', 'Primera Regidora', 'Ingeniera de Sistemas con especialidad en modernización del estado.', 'https://lh3.googleusercontent.com/aida-public/AB6AXuBQFhthJVk2oysLMe9NvFApkFB-Kr3TdvP6SwCdQcLShHOHyflhy2kSAyEwBzoqMUB4fU3T2eoMTwtFyEgompIJzg7K0lHqk4qSlaFVFyjr4M8eeH3FP24VKB5tS_PkBngyvRGpIIDDU8ksX7ime1Tgi8U1XICi6Qu66Wd8VZF18T_i_TuS0htk42Axja61XmEKuQYXAPhdzLLCPGFGl0dZqrvaSZWQcC-mbv-2eOiQEla_RmyyUE62KYuTEcocZaW-XW3qBbBcPA'],
-                    ['Juan Huamán', 'Segundo Regidor', 'Especialista agrario con experiencia en riego tecnificado.', 'https://lh3.googleusercontent.com/aida-public/AB6AXuBZPAWWn2JpegQV_OkUjFlpQRpimxixhmkngOnFzhmYjeCupLbn08-s00yAVRt25jZqTOzotYvtA6R73-w04dn6ParP3oOwiZcmUANS24V7Ky1EsC3ZRti7e8GzWxEZpkNNGPahFwy_w4vjsYFYJ2R01r1gEP_jtQiSPAugnwOO7JvijYE2LoiGoedU2IdIozNXfFL3n2x4EK603_mN_ihmBiIf3kL12NV8kLh5QBCcI3Hwtn1kMTGlrX_Fldlz-vHhyjnCS84ihw'],
-                    ['Sofía Paredes', 'Tercera Regidora', 'Abogada especialista en derecho administrativo y gestión municipal.', 'https://lh3.googleusercontent.com/aida-public/AB6AXuCJjWxvycLpoub4d8BjXZ_Wt_BHnHa8kR2F3bJxshBbxWqHnt0A_ERdtL3n_E4AgxbeX7UFvQBJpYJBJPj09C69v329-UYvMYwA0pKx8g38x7qssafMd0Jel_fUPnkTEACWgBYpIAArvgvWd1RKdMRi-oANZl286rjM94yAdAHGl6dSWv1-383av8OuNT3nl8F7nCPYdFbSsXpEHZe_PtcQT2Zxx_wpegqRR5g1tS-UqzfULOnYCNejVrVZV1qnE5bO42Mgbvh8Ew'],
-                    ['Luis Castro', 'Cuarto Regidor', 'Ingeniero Civil experto en infraestructura vial y saneamiento rural.', 'https://lh3.googleusercontent.com/aida-public/AB6AXuDEHZJZ4ZCfJ5d_x7UQUHFa44sVERu2gXHfDEuTcW3j4pk_TNxg7qGLzjjZfkC2BuIriAcvQWIr4G8KrxsyzIjkc3W9Yg6xuUx2IohP5o49ZNQSR8P_G7z9Yg_Izvp9QPmcN5VN1k1X9c3k5bjZD3uflDVbKkQR2WGnqK1IXCrMlMIggmGQYwtTU32oe620Q1G7qF1q7PRY1uaG55TaY9H8sSmQXLZkRVGYsBAvmrnBMUo3UDcNgvIGHcTe3H_aR8bDkedEcJch8w'],
-                ] as [$member, $role, $copy, $photo])
+                @foreach ($councilItems as $member)
                     <article class="group text-center">
                         <div class="mb-6 aspect-square overflow-hidden rounded-[32px] shadow-[0px_10px_40px_rgba(33,68,139,0.06)] grayscale transition duration-200 group-hover:grayscale-0">
-                            <img class="h-full w-full object-cover" src="{{ $photo }}" alt="{{ $member }}">
+                            <img class="h-full w-full object-cover" src="{{ $imageUrl($member->photo_path) }}" alt="{{ $member->name }}">
                         </div>
-                        <p class="mb-1 text-[14px] font-semibold uppercase leading-[1.2] tracking-[0.05em] text-secondary">{{ $role }}</p>
-                        <h3 class="font-headline text-[24px] font-semibold leading-[1.3] text-primary">{{ $member }}</h3>
-                        <p class="mt-2 px-4 leading-[1.6] text-on-surface-variant">{{ $copy }}</p>
+                        <p class="mb-1 text-[14px] font-semibold uppercase leading-[1.2] tracking-[0.05em] text-secondary">{{ $member->position }}</p>
+                        <h3 class="font-headline text-[24px] font-semibold leading-[1.3] text-primary">{{ $member->name }}</h3>
+                        <p class="mt-2 px-4 leading-[1.6] text-on-surface-variant">{{ $member->bio }}</p>
                     </article>
                 @endforeach
             </div>
         </div>
     </section>
+    @endif
 
+    @if ($sectionVisible('equipo_tecnico'))
     <section class="bg-surface py-16 md:py-28">
         <div class="campaign-container space-y-12">
             <div class="space-y-4 text-center">
@@ -130,24 +175,22 @@
             </div>
 
             <div class="grid gap-8 sm:grid-cols-3">
-                @foreach ([
-                    ['Juan Mendoza', 'Coordinador de Base', 'Ingeniero Civil con amplia experiencia en organización comunitaria y desarrollo local.', 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgcng9IjgiIGZpbGw9IiNlOGVhZWQiLz48cGF0aCBkPSJNMTcwIDEzMCBsMzAgNDAgbDIwLTE1IGw0MCA1NSBIMTQweiIgZmlsbD0iI2JkYzFjNiIvPjxjaXJjbGUgY3g9IjI1MCIgY3k9IjEyMCIgcj0iMTgiIGZpbGw9IiNiZGMxYzYiLz48L3N2Zz4='],
-                    ['Luis Tinoco', 'Coordinador de Sedes', 'Ingeniero Agrónomo especializado en gestión de infraestructura y logística rural.', 'https://lh3.googleusercontent.com/aida-public/AB6AXuAHgCrUmOWo1qfHSy-4zCo8rrxJJ2gqaBgvhjL7gu7mXQC1KWeB1jzNL2y71GBLv7EZiBrRuiZPGvd3blZdbETxYYX5bPLge0jSmeV3D5FlpQWi2-WzzXY7KoF9quubDDuslH6jvLudjCLCtN0IwUyacYqfrv3a5lazTPgXBo5RiNuqtcqD4bml0O0jcNCfASQd5vomUxOhopC5h109eY_wh3aWwEdORh7kfxaVov0Uw-r-A87pcNfk59koiaUAU7G3vpeuwbAlTg'],
-                    ['Ana Valdivia', 'Coordinadora de Plan de Gobierno', 'Gestora Pública experta en diseño de políticas municipales y transparencia.', 'https://lh3.googleusercontent.com/aida-public/AB6AXuDalZJjYC4JTdjtcRqYppi5BJgRSI1Q7DXMDrKyyXCsT7pG9P9nBSKLHYXyZfotQ4P_tPVQCisd16HRyv3IKYdj2EPsmahspsZMa-XWuYUTAAwSQNZeDKtwMfTpNk4K6zte9N1fYxysIPuxeamQuJyWI80WIetSGroSDnzyyk7D88kNN-rNwKpdMam8dwFwK8NJwmIH9v8MufFbDxC0FDn2f3Y5oa7cz1K_H_UPJoNOpqPEuNSBQcExvvzBhEdBeAZ9UrR_dwh_FA'],
-                ] as [$member, $role, $copy, $photo])
+                @foreach ($technicalItems as $member)
                     <article class="group text-center">
                         <div class="mb-6 aspect-square overflow-hidden rounded-[32px] shadow-[0px_10px_40px_rgba(33,68,139,0.06)] grayscale transition duration-200 group-hover:grayscale-0">
-                            <img class="h-full w-full object-cover" src="{{ $photo }}" alt="{{ $member }}">
+                            <img class="h-full w-full object-cover" src="{{ $imageUrl($member->photo_path) }}" alt="{{ $member->name }}">
                         </div>
-                        <p class="mb-1 text-[14px] font-semibold uppercase leading-[1.2] tracking-[0.05em] text-secondary">{{ $role }}</p>
-                        <h3 class="font-headline text-[24px] font-semibold leading-[1.3] text-primary">{{ $member }}</h3>
-                        <p class="mt-2 px-4 leading-[1.6] text-on-surface-variant">{{ $copy }}</p>
+                        <p class="mb-1 text-[14px] font-semibold uppercase leading-[1.2] tracking-[0.05em] text-secondary">{{ $member->role }}</p>
+                        <h3 class="font-headline text-[24px] font-semibold leading-[1.3] text-primary">{{ $member->name }}</h3>
+                        <p class="mt-2 px-4 leading-[1.6] text-on-surface-variant">{{ $member->bio }}</p>
                     </article>
                 @endforeach
             </div>
         </div>
     </section>
+    @endif
 
+    @if ($sectionVisible('distrito'))
     <section class="bg-surface-container-lowest py-16 md:py-28">
         <div class="campaign-container">
             <div class="mb-16 space-y-4 text-center">
@@ -156,22 +199,24 @@
             </div>
 
             <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-                <div class="col-span-2 row-span-2 overflow-hidden rounded-3xl shadow-[0px_10px_40px_rgba(33,68,139,0.06)]">
-                    <img class="h-full w-full cursor-pointer object-cover transition duration-300 hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBhvx8BI88fuvxfyTbMgUUSUR4wJamKwLJIdAiGNlbvFgQNVNgFx4IWct-_JHKMzBRd0gvRz-SP7DvIRDrWzfJ6ffIRN_QOhSNtPqR6VTcRaAK2Ct8tLZIC7wrZI3sTKMye9aXUnUOK1cjqBbZKX6y7VzniWdHB4YV9Wj6Y5abhJcEvsiOcTpQ76fv53DA_LnB-ZDgyZfzKGenHBpTcEl5OVkiC-StI0MUpipWDE26Ka7jYVZXJDOfvfcu-fKvi9khSzKJxU1o1rQ" alt="Jornada de diálogo en Olleros">
-                </div>
-                <div class="h-48 overflow-hidden rounded-3xl shadow-[0px_10px_40px_rgba(33,68,139,0.06)] md:h-full">
-                    <img class="h-full w-full cursor-pointer object-cover transition duration-300 hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDalZJjYC4JTdjtcRqYppi5BJgRSI1Q7DXMDrKyyXCsT7pG9P9nBSKLHYXyZfotQ4P_tPVQCisd16HRyv3IKYdj2EPsmahspsZMa-XWuYUTAAwSQNZeDKtwMfTpNk4K6zte9N1fYxysIPuxeamQuJyWI80WIetSGroSDnzyyk7D88kNN-rNwKpdMam8dwFwK8NJwmIH9v8MufFbDxC0FDn2f3Y5oa7cz1K_H_UPJoNOpqPEuNSBQcExvvzBhEdBeAZ9UrR_dwh_FA" alt="Saludo con vecinos de Olleros">
-                </div>
-                <div class="h-48 overflow-hidden rounded-3xl shadow-[0px_10px_40px_rgba(33,68,139,0.06)] md:h-full">
-                    <img class="h-full w-full cursor-pointer object-cover transition duration-300 hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhQg7J9iBM4WwQftWaJD1P3QMCkgRfmPdRVvtxIj662OPzrbRLkKz58w6v6c9ILIs8SPKBEbq8K4xWH8VwLNhBygcsG649lCWOjgJ1gi5GxfBoaIyulSE5D1Eb1b71zszNHA1rhbc1TAK3LvydQYyHVuJPVPPtWEi9wfxRnqGnQeYohkTMM8py4J7i6SoBEZJNcz8igg5s7QQhKpmjnKwUY7p-1-xOnqijd_kh9FnLDftxkorbmklX07hDUAylJ0c9sD5i6dl33A" alt="Taller con jóvenes de Olleros">
-                </div>
-                <div class="col-span-2 h-64 overflow-hidden rounded-3xl shadow-[0px_10px_40px_rgba(33,68,139,0.06)]">
-                    <img class="h-full w-full cursor-pointer object-cover transition duration-300 hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHgCrUmOWo1qfHSy-4zCo8rrxJJ2gqaBgvhjL7gu7mXQC1KWeB1jzNL2y71GBLv7EZiBrRuiZPGvd3blZdbETxYYX5bPLge0jSmeV3D5FlpQWi2-WzzXY7KoF9quubDDuslH6jvLudjCLCtN0IwUyacYqfrv3a5lazTPgXBo5RiNuqtcqD4bml0O0jcNCfASQd5vomUxOhopC5h109eY_wh3aWwEdORh7kfxaVov0Uw-r-A87pcNfk59koiaUAU7G3vpeuwbAlTg" alt="Campo agrícola de Olleros">
-                </div>
+                @foreach ($districtItems as $image)
+                    @php
+                        $layoutClass = match ($image->layout) {
+                            'featured' => 'col-span-2 row-span-2 min-h-[22rem]',
+                            'wide' => 'col-span-2 h-64',
+                            default => 'h-48 md:h-full',
+                        };
+                    @endphp
+                    <div class="{{ $layoutClass }} overflow-hidden rounded-3xl shadow-[0px_10px_40px_rgba(33,68,139,0.06)]">
+                        <img class="h-full w-full cursor-pointer object-cover transition duration-300 hover:scale-105" src="{{ $imageUrl($image->image_path) }}" alt="{{ $image->image_alt ?? $image->title }}">
+                    </div>
+                @endforeach
             </div>
         </div>
     </section>
+    @endif
 
+    @if ($sectionVisible('sumate'))
     <section id="sumate" class="bg-surface py-16 md:py-28">
         <div class="campaign-container">
             <div class="campaign-card grid gap-10 rounded-[2rem] bg-surface-container-low p-8 md:grid-cols-2 md:p-12">
@@ -215,7 +260,9 @@
             </div>
         </div>
     </section>
+    @endif
 
+    @if ($sectionVisible('transparencia'))
     <section id="transparencia" class="bg-surface-container-low py-16 md:py-28">
         <div class="campaign-container">
             <div class="mx-auto mb-12 max-w-3xl text-center">
@@ -233,15 +280,12 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-outline-variant/30">
-                        @foreach ([
-                            ['Asociacion de Productores', 'Materiales', '1000 volantes', '15 Oct 2026'],
-                            ['Comite Vecinal Barrio Centro', 'Organizacion', 'Sede para reunion', '12 Oct 2026'],
-                            ['Aporte voluntario individual', 'Economico', 'S/ 500.00', '10 Oct 2026'],
-                        ] as $row)
+                        @foreach ($contributionItems as $row)
                             <tr class="hover:bg-primary/5">
-                                @foreach ($row as $cell)
-                                    <td class="px-6 py-4">{{ $cell }}</td>
-                                @endforeach
+                                <td class="px-6 py-4">{{ $row->contributor_name }}</td>
+                                <td class="px-6 py-4">{{ $row->contribution_type }}</td>
+                                <td class="px-6 py-4">{{ $row->detail }}</td>
+                                <td class="px-6 py-4">{{ \Illuminate\Support\Carbon::parse($row->contribution_date)->format('d M Y') }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -249,7 +293,9 @@
             </div>
         </div>
     </section>
+    @endif
 
+    @if ($sectionVisible('contacto'))
     <section id="contacto" class="bg-surface py-16 md:py-24">
         <div class="campaign-container grid gap-10 md:grid-cols-3">
             <div class="md:col-span-2">
@@ -266,4 +312,5 @@
             </div>
         </div>
     </section>
+    @endif
 </x-public-layout>

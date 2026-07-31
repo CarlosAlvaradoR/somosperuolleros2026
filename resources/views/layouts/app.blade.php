@@ -12,28 +12,28 @@
         <div class="flex min-h-screen" x-data="{ sidebar: false }">
             <aside class="fixed inset-y-0 left-0 z-50 w-72 -translate-x-full border-r border-outline-variant/30 bg-surface-container-lowest transition lg:static lg:translate-x-0" :class="{ 'translate-x-0': sidebar }">
                 <div class="flex h-20 items-center border-b border-outline-variant/20 px-6">
-                    <x-campaign-logo class="[&>span:last-child]:text-lg" />
+                    <x-campaign-logo class="[&>img]:h-10 [&>span:last-child]:text-[18px]" />
                 </div>
 
                 <nav class="flex-1 space-y-2 px-4 py-6">
-                    <a href="{{ route('dashboard') }}" class="flex items-center gap-3 rounded-lg bg-primary-fixed px-4 py-3 font-semibold text-primary">
-                        <span class="material-symbols-outlined">dashboard</span>
+                    <a href="{{ route('dashboard') }}" class="flex items-center gap-3 rounded-lg bg-primary-fixed px-4 py-3 text-[15px] font-semibold text-primary">
+                        <span class="material-symbols-outlined text-[22px]">dashboard</span>
                         Inicio
                     </a>
-                    <a href="#" class="flex items-center gap-3 rounded-lg px-4 py-3 font-semibold text-on-surface-variant transition hover:bg-surface-container">
-                        <span class="material-symbols-outlined">description</span>
+                    <a href="#" class="flex items-center gap-3 rounded-lg px-4 py-3 text-[15px] font-semibold text-on-surface-variant transition hover:bg-surface-container">
+                        <span class="material-symbols-outlined text-[22px]">description</span>
                         Propuestas
                     </a>
-                    <a href="#" class="flex items-center gap-3 rounded-lg px-4 py-3 font-semibold text-on-surface-variant transition hover:bg-surface-container">
-                        <span class="material-symbols-outlined">account_balance_wallet</span>
+                    <a href="#" class="flex items-center gap-3 rounded-lg px-4 py-3 text-[15px] font-semibold text-on-surface-variant transition hover:bg-surface-container">
+                        <span class="material-symbols-outlined text-[22px]">account_balance_wallet</span>
                         Transparencia
                     </a>
-                    <a href="#" class="flex items-center gap-3 rounded-lg px-4 py-3 font-semibold text-on-surface-variant transition hover:bg-surface-container">
-                        <span class="material-symbols-outlined">settings</span>
+                    <a href="#" class="flex items-center gap-3 rounded-lg px-4 py-3 text-[15px] font-semibold text-on-surface-variant transition hover:bg-surface-container">
+                        <span class="material-symbols-outlined text-[22px]">settings</span>
                         Configuracion
                     </a>
-                    <a href="{{ route('landing') }}" class="flex items-center gap-3 rounded-lg px-4 py-3 font-semibold text-on-surface-variant transition hover:bg-surface-container">
-                        <span class="material-symbols-outlined">public</span>
+                    <a href="{{ route('landing') }}" class="flex items-center gap-3 rounded-lg px-4 py-3 text-[15px] font-semibold text-on-surface-variant transition hover:bg-surface-container">
+                        <span class="material-symbols-outlined text-[22px]">public</span>
                         Ver landing
                     </a>
                 </nav>
@@ -52,7 +52,7 @@
                         @isset($header)
                             {{ $header }}
                         @else
-                            <h1 class="font-headline text-2xl font-extrabold text-primary">Panel de campana</h1>
+                            <h1 class="font-headline text-[24px] font-extrabold text-primary">Panel de campana</h1>
                         @endisset
                     </div>
 
@@ -61,14 +61,37 @@
                             <span class="material-symbols-outlined">notifications</span>
                             <span class="absolute right-2 top-2 h-2 w-2 rounded-full bg-secondary"></span>
                         </button>
-                        <div class="hidden text-right sm:block">
-                            <p class="text-sm font-bold text-on-surface">{{ Auth::user()->name ?? 'Admin Mirko' }}</p>
-                            <p class="text-xs text-on-surface-variant">Coordinador General</p>
+                        <div class="h-10 w-px bg-outline-variant/30"></div>
+                        <div class="relative" x-data="{ accountOpen: false }">
+                            <button class="flex items-center gap-3 rounded-xl px-2 py-1 transition hover:bg-surface-container" type="button" x-on:click="accountOpen = ! accountOpen">
+                                <div class="hidden text-right sm:block">
+                                    <p class="text-[13px] font-bold text-on-surface">{{ Auth::user()->name ?? 'Admin Mirko' }}</p>
+                                    <p class="text-xs text-on-surface-variant">Coordinador General</p>
+                                </div>
+                                <div class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-primary/10 bg-primary-fixed text-primary">
+                                    <span class="material-symbols-outlined">person</span>
+                                </div>
+                                <span class="material-symbols-outlined text-on-surface-variant" x-text="accountOpen ? 'arrow_drop_up' : 'arrow_drop_down'"></span>
+                            </button>
+
+                            <div class="absolute right-0 mt-3 w-56 rounded-xl border border-outline-variant/30 bg-white p-2 shadow-2xl" x-cloak x-show="accountOpen" x-transition x-on:click.outside="accountOpen = false">
+                                <a class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-on-surface-variant transition hover:bg-primary/5 hover:text-primary" href="{{ route('profile.edit') }}">
+                                    <span class="material-symbols-outlined text-[20px]">manage_accounts</span>
+                                    Perfil
+                                </a>
+                                <a class="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-semibold text-on-surface-variant transition hover:bg-primary/5 hover:text-primary" href="{{ route('landing') }}">
+                                    <span class="material-symbols-outlined text-[20px]">public</span>
+                                    Ver landing
+                                </a>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-semibold text-secondary transition hover:bg-secondary/10" type="submit">
+                                        <span class="material-symbols-outlined text-[20px]">logout</span>
+                                        Cerrar sesión
+                                    </button>
+                                </form>
+                            </div>
                         </div>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button class="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-on-primary transition hover:bg-secondary" type="submit">Salir</button>
-                        </form>
                     </div>
                 </header>
 

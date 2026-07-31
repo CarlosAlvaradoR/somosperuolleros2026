@@ -1,15 +1,73 @@
 <?php
 
+use App\Http\Controllers\CampaignDashboardController;
 use App\Http\Controllers\ProfileController;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    $sections = DB::table('site_sections')
+        ->whereNull('deleted_at')
+        ->where('active', true)
+        ->get()
+        ->keyBy('key');
+
+    $proposals = DB::table('government_proposals')
+        ->whereNull('deleted_at')
+        ->where('active', true)
+        ->orderBy('sort_order')
+        ->get();
+
+    $councilMembers = DB::table('council_members')
+        ->whereNull('deleted_at')
+        ->where('active', true)
+        ->orderBy('sort_order')
+        ->get();
+
+    $technicalTeam = DB::table('technical_team_members')
+        ->whereNull('deleted_at')
+        ->where('active', true)
+        ->orderBy('sort_order')
+        ->get();
+
+    $districtImages = DB::table('district_gallery_images')
+        ->whereNull('deleted_at')
+        ->where('active', true)
+        ->orderBy('sort_order')
+        ->get();
+
+    $contributions = DB::table('transparency_contributions')
+        ->whereNull('deleted_at')
+        ->where('active', true)
+        ->orderByDesc('contribution_date')
+        ->get();
+
+    return view('welcome', compact(
+        'sections',
+        'proposals',
+        'councilMembers',
+        'technicalTeam',
+        'districtImages',
+        'contributions'
+    ));
 })->name('landing');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', [CampaignDashboardController::class, 'index'])->name('dashboard');
+    Route::patch('/dashboard/visibility', [CampaignDashboardController::class, 'updateVisibility'])->name('dashboard.visibility.update');
+    Route::post('/dashboard/proposals', [CampaignDashboardController::class, 'storeProposal'])->name('dashboard.proposals.store');
+    Route::patch('/dashboard/proposals/{proposal}', [CampaignDashboardController::class, 'updateProposal'])->name('dashboard.proposals.update');
+    Route::delete('/dashboard/proposals/{proposal}', [CampaignDashboardController::class, 'destroyProposal'])->name('dashboard.proposals.destroy');
+    Route::post('/dashboard/regidores', [CampaignDashboardController::class, 'storeCouncilMember'])->name('dashboard.council.store');
+    Route::patch('/dashboard/regidores/{member}', [CampaignDashboardController::class, 'updateCouncilMember'])->name('dashboard.council.update');
+    Route::delete('/dashboard/regidores/{member}', [CampaignDashboardController::class, 'destroyCouncilMember'])->name('dashboard.council.destroy');
+    Route::post('/dashboard/distrito', [CampaignDashboardController::class, 'storeDistrictImage'])->name('dashboard.district.store');
+    Route::patch('/dashboard/distrito/{image}', [CampaignDashboardController::class, 'updateDistrictImage'])->name('dashboard.district.update');
+    Route::delete('/dashboard/distrito/{image}', [CampaignDashboardController::class, 'destroyDistrictImage'])->name('dashboard.district.destroy');
+    Route::post('/dashboard/aportes', [CampaignDashboardController::class, 'storeContribution'])->name('dashboard.contributions.store');
+    Route::patch('/dashboard/aportes/{contribution}', [CampaignDashboardController::class, 'updateContribution'])->name('dashboard.contributions.update');
+    Route::delete('/dashboard/aportes/{contribution}', [CampaignDashboardController::class, 'destroyContribution'])->name('dashboard.contributions.destroy');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
