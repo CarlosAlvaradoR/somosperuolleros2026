@@ -13,7 +13,7 @@
             class="flex min-h-screen"
             x-data="{
                 sidebar: false,
-                dashboardPanel: ['inicio', 'propuestas', 'regidores', 'galeria', 'transparencia', 'configuracion'].includes(window.location.hash.replace('#', '')) ? window.location.hash.replace('#', '') : 'inicio',
+                dashboardPanel: ['inicio', 'portada', 'propuestas', 'regidores', 'galeria', 'transparencia', 'configuracion'].includes(window.location.hash.replace('#', '')) ? window.location.hash.replace('#', '') : 'inicio',
                 openDashboardPanel(panel) {
                     if (! window.location.pathname.includes('/dashboard')) {
                         window.location.href = '{{ route('dashboard') }}#' + panel;
@@ -35,6 +35,10 @@
                     <a href="{{ route('dashboard') }}#inicio" x-on:click.prevent="openDashboardPanel('inicio')" class="flex items-center gap-3 rounded-lg px-4 py-3 text-[14px] font-semibold transition" :class="dashboardPanel === 'inicio' ? 'bg-primary-fixed text-primary' : 'text-on-surface-variant hover:bg-surface-container'">
                         <span class="material-symbols-outlined text-[22px]">dashboard</span>
                         Inicio
+                    </a>
+                    <a href="{{ route('dashboard') }}#portada" x-on:click.prevent="openDashboardPanel('portada')" class="flex items-center gap-3 rounded-lg px-4 py-3 text-[14px] font-semibold transition" :class="dashboardPanel === 'portada' ? 'bg-primary-fixed text-primary' : 'text-on-surface-variant hover:bg-surface-container'">
+                        <span class="material-symbols-outlined text-[22px]">home_app_logo</span>
+                        Portada
                     </a>
                     <a href="{{ route('dashboard') }}#propuestas" x-on:click.prevent="openDashboardPanel('propuestas')" class="flex items-center gap-3 rounded-lg px-4 py-3 text-[14px] font-semibold transition" :class="dashboardPanel === 'propuestas' ? 'bg-primary-fixed text-primary' : 'text-on-surface-variant hover:bg-surface-container'">
                         <span class="material-symbols-outlined text-[22px]">description</span>

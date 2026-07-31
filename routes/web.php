@@ -43,19 +43,34 @@ Route::get('/', function () {
         ->orderByDesc('contribution_date')
         ->get();
 
+    $heroContent = DB::table('landing_hero_contents')
+        ->whereNull('deleted_at')
+        ->where('active', true)
+        ->orderByDesc('id')
+        ->first();
+
+    $candidateBio = DB::table('candidate_biographies')
+        ->whereNull('deleted_at')
+        ->where('active', true)
+        ->orderByDesc('id')
+        ->first();
     return view('welcome', compact(
         'sections',
         'proposals',
         'councilMembers',
         'technicalTeam',
         'districtImages',
-        'contributions'
+        'contributions',
+        'heroContent',
+        'candidateBio'
     ));
 })->name('landing');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [CampaignDashboardController::class, 'index'])->name('dashboard');
     Route::patch('/dashboard/visibility', [CampaignDashboardController::class, 'updateVisibility'])->name('dashboard.visibility.update');
+    Route::post('/dashboard/portada', [CampaignDashboardController::class, 'updateHero'])->name('dashboard.hero.update');
+    Route::post('/dashboard/biografia', [CampaignDashboardController::class, 'updateBiography'])->name('dashboard.biography.update');
     Route::patch('/dashboard/reordenar/{type}', [CampaignDashboardController::class, 'reorder'])->name('dashboard.reorder');
     Route::post('/dashboard/proposals', [CampaignDashboardController::class, 'storeProposal'])->name('dashboard.proposals.store');
     Route::patch('/dashboard/proposals/{proposal}', [CampaignDashboardController::class, 'updateProposal'])->name('dashboard.proposals.update');

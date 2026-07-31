@@ -2,6 +2,26 @@
     @php
         $sectionVisible = fn (string $key) => ! isset($sections) || ! $sections->has($key) || (bool) $sections->get($key)->is_visible;
         $imageUrl = fn (?string $path) => $path && (str_starts_with($path, 'http') || str_starts_with($path, 'data:')) ? $path : ($path ? asset($path) : '');
+        $hero = $heroContent ?? (object) [
+            'eyebrow' => '{{ $hero->eyebrow }}',
+            'title' => 'Agua, chacra y futuro para',
+            'highlighted_title' => 'Olleros',
+            'description' => '{{ $hero->description }}',
+            'primary_button_label' => 'Súmate al cambio',
+            'primary_button_url' => '#sumate',
+            'secondary_button_label' => 'Ver Plan de Gobierno',
+            'secondary_button_url' => '#plan',
+            'image_path' => 'https://lh3.googleusercontent.com/aida-public/AB6AXuDgCorCyDnL3U6fpvzz9_KkG9Mvy8nfzviGLDZreVRtJWjQB01fOhnyLnTo7QYwJvJCViY72gEptCJ61Xz6usCU8Ltd-mV6o_thXu9zuPquFMqKevhN6qjhQKuOBQI4wf0ybmKfl9B-oFbrEmh_gh09H2OcpUVnDN6PHYRTyqLB-JJTbX_UAJJS_zuAhLOdcMVSCFjuuc7jla0CvxKTc55Ypdue6ntwA8pjZoUOJ-eKcIoTSNQti5TYuIaa0rQp3OQ7Dh00KpMHLA',
+            'image_alt' => 'Mirko Cacha en paisaje andino de Olleros',
+        ];
+        $bio = $candidateBio ?? (object) [
+            'title' => '{{ $bio->title }}',
+            'summary' => 'Contador público colegiado con trayectoria en gestión pública, administración municipal y docencia. Conoce de cerca la realidad del campo, el turno de agua, la educación rural y las necesidades de cada caserío.',
+            'image_path' => 'https://lh3.googleusercontent.com/aida-public/AB6AXuBjyBWYiwBoWfIj_gqGQyhWLs81N1I1WNEw4-B-eLi70wefeP_R0437rB1zduntzUAypyshKURPJyCdncY66L-1bwLVI_0kBYwx5hU1eaOiP8q7zwAUpO4wDVE2mGEqJpyUkOT9VqUr3hG1rfB7f4uHXJgO5QoEIClECThkK2CbQHYP2RjVzFKf7fFuCo4-yAJCQp5duQRJewhR4aLF9KnVwW_cm5evB4mwGSoImHluZLMh5xD0T1Rnl0fHL3rlFO3an3LWGI16OQ',
+            'image_alt' => 'Mirko Cacha dialogando con agricultores de Olleros',
+            'facts' => json_encode(['Gestión pública', 'Trayectoria académica', 'Trabajo comunal'], JSON_UNESCAPED_UNICODE),
+        ];
+        $bioFacts = collect(json_decode($bio->facts ?? '[]', true) ?: [])->filter()->values();
         $proposalItems = isset($proposals) && $proposals->isNotEmpty()
             ? $proposals
             : collect([
@@ -50,28 +70,28 @@
             <div class="space-y-8 md:col-span-7">
                 <span class="inline-flex items-center gap-2 rounded-full bg-secondary-fixed px-4 py-1.5 text-[14px] font-semibold uppercase leading-[1.2] tracking-[0.05em] text-secondary">
                     <span class="h-2 w-2 rounded-full bg-secondary"></span>
-                    Candidato a Alcalde 2026
+                    {{ $hero->eyebrow }}
                 </span>
 
                 <div class="space-y-6">
                     <h1 class="font-headline text-[56px] font-extrabold leading-[1.08] text-primary md:text-[80px]">
-                        Agua, chacra y futuro para <span class="text-secondary">Olleros</span>
+                        {{ $hero->title }} <span class="text-secondary">{{ $hero->highlighted_title }}</span>
                     </h1>
                     <p class="max-w-xl text-[18px] leading-[1.6] text-on-surface-variant">
-                        Mirko Cacha, candidato a la alcaldía distrital de Olleros. Un plan de gobierno construido desde el canal, la chacra y la plaza — no desde un escritorio.
+                        {{ $hero->description }}
                     </p>
                 </div>
 
                 <div class="flex flex-col gap-4 pt-4 sm:flex-row">
-                    <a class="rounded-xl bg-primary px-8 py-4 text-center text-[14px] font-semibold leading-[1.2] tracking-[0.05em] text-on-primary shadow-none transition hover:bg-secondary" href="#sumate">Súmate al cambio</a>
-                    <a class="campaign-button-outline" href="#plan">Ver Plan de Gobierno</a>
+                    <a class="rounded-xl bg-primary px-8 py-4 text-center text-[14px] font-semibold leading-[1.2] tracking-[0.05em] text-on-primary shadow-none transition hover:bg-secondary" href="{{ $hero->primary_button_url ?: '#sumate' }}">{{ $hero->primary_button_label ?: 'Súmate al cambio' }}</a>
+                    <a class="campaign-button-outline" href="{{ $hero->secondary_button_url ?: '#plan' }}">{{ $hero->secondary_button_label ?: 'Ver Plan de Gobierno' }}</a>
                 </div>
             </div>
 
             <div class="group relative md:col-span-5">
                 <div class="absolute -inset-4 rounded-[40px] bg-primary/5 blur-2xl transition group-hover:bg-secondary/5"></div>
                 <div class="relative aspect-[4/5] overflow-hidden rounded-[40px] shadow-[0px_10px_40px_rgba(33,68,139,0.06)]">
-                    <img class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgCorCyDnL3U6fpvzz9_KkG9Mvy8nfzviGLDZreVRtJWjQB01fOhnyLnTo7QYwJvJCViY72gEptCJ61Xz6usCU8Ltd-mV6o_thXu9zuPquFMqKevhN6qjhQKuOBQI4wf0ybmKfl9B-oFbrEmh_gh09H2OcpUVnDN6PHYRTyqLB-JJTbX_UAJJS_zuAhLOdcMVSCFjuuc7jla0CvxKTc55Ypdue6ntwA8pjZoUOJ-eKcIoTSNQti5TYuIaa0rQp3OQ7Dh00KpMHLA" alt="Mirko Cacha en paisaje andino de Olleros">
+                    <img class="h-full w-full object-cover" src="{{ $imageUrl($hero->image_path) }}" alt="{{ $hero->image_alt ?: $hero->title }}">
                 </div>
             </div>
         </div>
@@ -86,16 +106,16 @@
         <div class="campaign-container grid items-center gap-12 md:grid-cols-2">
             <div class="relative order-2 md:order-1">
                 <div class="absolute -left-4 -top-4 h-24 w-24 rounded-tl-3xl border-l-4 border-t-4 border-secondary/30"></div>
-                <img class="relative w-full rounded-3xl shadow-[0px_10px_40px_rgba(33,68,139,0.06)]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjyBWYiwBoWfIj_gqGQyhWLs81N1I1WNEw4-B-eLi70wefeP_R0437rB1zduntzUAypyshKURPJyCdncY66L-1bwLVI_0kBYwx5hU1eaOiP8q7zwAUpO4wDVE2mGEqJpyUkOT9VqUr3hG1rfB7f4uHXJgO5QoEIClECThkK2CbQHYP2RjVzFKf7fFuCo4-yAJCQp5duQRJewhR4aLF9KnVwW_cm5evB4mwGSoImHluZLMh5xD0T1Rnl0fHL3rlFO3an3LWGI16OQ" alt="Mirko Cacha dialogando con agricultores de Olleros">
+                <img class="relative w-full rounded-3xl shadow-[0px_10px_40px_rgba(33,68,139,0.06)]" src="{{ $imageUrl($bio->image_path) }}" alt="{{ $bio->image_alt ?: $bio->title }}">
             </div>
             <div class="order-1 space-y-6 md:order-2">
-                <h2 class="font-headline text-4xl font-extrabold text-primary">Mirko Cacha: experiencia y compromiso</h2>
+                <h2 class="font-headline text-4xl font-extrabold text-primary">{{ $bio->title }}</h2>
                 <div class="h-1.5 w-20 rounded-full bg-secondary"></div>
                 <p class="text-lg leading-8 text-on-surface-variant">
-                    Contador publico colegiado con trayectoria en gestion publica, administracion municipal y docencia. Conoce de cerca la realidad del campo, el turno de agua, la educacion rural y las necesidades de cada caserio.
+                    {{ $bio->summary }}
                 </p>
                 <div class="grid gap-4 sm:grid-cols-3">
-                    @foreach (['Gestion publica', 'Trayectoria academica', 'Trabajo comunal'] as $value)
+                    @foreach ($bioFacts as $value)
                         <div class="flex items-center gap-3 font-bold text-primary">
                             <span class="material-symbols-outlined text-secondary">verified</span>
                             <span>{{ $value }}</span>

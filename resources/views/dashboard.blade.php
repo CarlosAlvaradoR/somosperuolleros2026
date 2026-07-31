@@ -6,6 +6,26 @@
 
     @php
         $defaultImage = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgcng9IjgiIGZpbGw9IiNlOGVhZWQiLz48cGF0aCBkPSJNMTcwIDEzMCBsMzAgNDAgbDIwLTE1IGw0MCA1NSBIMTQweiIgZmlsbD0iI2JkYzFjNiIvPjxjaXJjbGUgY3g9IjI1MCIgY3k9IjEyMCIgcj0iMTgiIGZpbGw9IiNiZGMxYzYiLz48L3N2Zz4=';
+        $assetImage = fn (?string $path) => $path && (str_starts_with($path, 'http') || str_starts_with($path, 'data:')) ? $path : ($path ? asset($path) : $defaultImage);
+        $heroForm = $heroContent ?? (object) [
+            'eyebrow' => 'Candidato a Alcalde 2026',
+            'title' => 'Agua, chacra y futuro para',
+            'highlighted_title' => 'Olleros',
+            'description' => 'Mirko Cacha, candidato a la alcaldía distrital de Olleros. Un plan de gobierno construido desde el canal, la chacra y la plaza — no desde un escritorio.',
+            'primary_button_label' => 'Súmate al cambio',
+            'primary_button_url' => '#sumate',
+            'secondary_button_label' => 'Ver Plan de Gobierno',
+            'secondary_button_url' => '#plan',
+            'campaign_year' => 2026,
+            'image_path' => '',
+        ];
+        $bioForm = $candidateBio ?? (object) [
+            'title' => 'Mirko Cacha: experiencia y compromiso',
+            'summary' => 'Contador público colegiado con trayectoria en gestión pública, administración municipal y docencia. Conoce de cerca la realidad del campo, el turno de agua, la educación rural y las necesidades de cada caserío.',
+            'image_path' => '',
+            'facts' => json_encode(['Gestión pública', 'Trayectoria académica', 'Trabajo comunal'], JSON_UNESCAPED_UNICODE),
+        ];
+        $bioFactsText = collect(json_decode($bioForm->facts ?? '[]', true) ?: [])->implode("\n");
     @endphp
 
     <div class="space-y-8">
@@ -62,6 +82,7 @@
 
             <div class="grid gap-4 md:grid-cols-3">
                 @foreach ([
+                    ['portada', 'home_app_logo', 'Portada', 'Edita la portada, la foto principal y la biografía.'],
                     ['propuestas', 'description', 'Propuestas', 'Edita los pilares del plan de gobierno.'],
                     ['regidores', 'groups', 'Regidores', 'Actualiza el equipo municipal y sus fotos.'],
                     ['galeria', 'photo_library', 'Galería', 'Administra las imágenes del distrito.'],
@@ -79,6 +100,82 @@
             </div>
         </section>
 
+        <section class="campaign-card p-6 md:p-8" x-show="dashboardPanel === 'portada'" x-cloak>
+            <div class="mb-8 flex items-center gap-3">
+                <span class="material-symbols-outlined text-primary">home_app_logo</span>
+                <div>
+                    <h2 class="font-headline text-[24px] font-bold text-on-surface">Portada y biografía</h2>
+                    <p class="text-[13px] text-on-surface-variant">Actualiza textos y fotos principales de la landing sin recargar la página.</p>
+                </div>
+            </div>
+
+            <div class="grid gap-6 xl:grid-cols-2">
+                <form class="rounded-2xl border border-outline-variant/20 bg-white p-5 shadow-sm" method="POST" action="{{ route('dashboard.hero.update') }}" enctype="multipart/form-data" data-ajax-form>
+                    @csrf
+                    <div class="mb-5 flex items-center justify-between gap-3">
+                        <div>
+                            <h3 class="font-headline text-xl font-bold text-primary">Portada principal</h3>
+                            <p class="text-[13px] text-on-surface-variant">Foto del candidato, titular y botones superiores.</p>
+                        </div>
+                        <button class="campaign-button-primary text-sm" type="submit">
+                            <span class="material-symbols-outlined text-[20px]">save</span>
+                            Guardar portada
+                        </button>
+                    </div>
+
+                    <input type="hidden" name="image_path" value="{{ $heroForm->image_path }}">
+                    <label class="group mb-5 flex min-h-56 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 p-4 text-center transition hover:bg-primary/10" data-drop-zone>
+                        <img class="mb-3 h-40 w-full rounded-xl object-cover" src="{{ $assetImage($heroForm->image_path) }}" data-image-preview alt="Foto de portada">
+                        <span class="text-[15px] font-bold text-primary">Cambiar foto de portada</span>
+                        <span class="mt-1 text-[13px] text-on-surface-variant">Arrastra una imagen o haz clic para subir.</span>
+                        <input name="image" type="file" accept="image/*" class="sr-only" data-preview-input>
+                    </label>
+
+                    <div class="grid gap-4 md:grid-cols-2">
+                        <input name="eyebrow" class="campaign-input bg-white" value="{{ $heroForm->eyebrow }}" placeholder="Etiqueta">
+                        <input name="campaign_year" type="number" min="2000" max="2100" class="campaign-input bg-white" value="{{ $heroForm->campaign_year ?? 2026 }}" placeholder="Año">
+                        <input name="title" class="campaign-input bg-white md:col-span-2" value="{{ $heroForm->title }}" placeholder="Título" required>
+                        <input name="highlighted_title" class="campaign-input bg-white md:col-span-2" value="{{ $heroForm->highlighted_title }}" placeholder="Texto resaltado">
+                        <textarea name="description" rows="4" class="campaign-input bg-white md:col-span-2" placeholder="Descripción">{{ $heroForm->description }}</textarea>
+                        <input name="primary_button_label" class="campaign-input bg-white" value="{{ $heroForm->primary_button_label }}" placeholder="Botón principal">
+                        <input name="primary_button_url" class="campaign-input bg-white" value="{{ $heroForm->primary_button_url }}" placeholder="#sumate">
+                        <input name="secondary_button_label" class="campaign-input bg-white" value="{{ $heroForm->secondary_button_label }}" placeholder="Botón secundario">
+                        <input name="secondary_button_url" class="campaign-input bg-white" value="{{ $heroForm->secondary_button_url }}" placeholder="#plan">
+                    </div>
+                </form>
+
+                <form class="rounded-2xl border border-outline-variant/20 bg-white p-5 shadow-sm" method="POST" action="{{ route('dashboard.biography.update') }}" enctype="multipart/form-data" data-ajax-form>
+                    @csrf
+                    <div class="mb-5 flex items-center justify-between gap-3">
+                        <div>
+                            <h3 class="font-headline text-xl font-bold text-primary">Quién es</h3>
+                            <p class="text-[13px] text-on-surface-variant">Biografía corta, foto de contexto y puntos de experiencia.</p>
+                        </div>
+                        <button class="campaign-button-primary text-sm" type="submit">
+                            <span class="material-symbols-outlined text-[20px]">save</span>
+                            Guardar biografía
+                        </button>
+                    </div>
+
+                    <input type="hidden" name="image_path" value="{{ $bioForm->image_path }}">
+                    <label class="group mb-5 flex min-h-56 cursor-pointer flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 p-4 text-center transition hover:bg-primary/10" data-drop-zone>
+                        <img class="mb-3 h-40 w-full rounded-xl object-cover" src="{{ $assetImage($bioForm->image_path) }}" data-image-preview alt="Foto de biografía">
+                        <span class="text-[15px] font-bold text-primary">Cambiar foto de biografía</span>
+                        <span class="mt-1 text-[13px] text-on-surface-variant">Arrastra una imagen o haz clic para subir.</span>
+                        <input name="image" type="file" accept="image/*" class="sr-only" data-preview-input>
+                    </label>
+
+                    <div class="grid gap-4">
+                        <input name="title" class="campaign-input bg-white" value="{{ $bioForm->title }}" placeholder="Título" required>
+                        <textarea name="summary" rows="5" class="campaign-input bg-white" placeholder="Resumen">{{ $bioForm->summary }}</textarea>
+                        <div>
+                            <label class="campaign-label">Puntos de experiencia</label>
+                            <textarea name="facts_text" rows="4" class="campaign-input bg-white" placeholder="Un punto por línea">{{ $bioFactsText }}</textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
         <form
             class="campaign-card p-6 md:p-8"
             method="POST"

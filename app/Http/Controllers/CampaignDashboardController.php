@@ -18,6 +18,17 @@ class CampaignDashboardController extends Controller
             ->where('active', true)
             ->orderBy('sort_order')
             ->get();
+        $heroContent = DB::table('landing_hero_contents')
+            ->whereNull('deleted_at')
+            ->orderByDesc('active')
+            ->orderByDesc('id')
+            ->first();
+
+        $candidateBio = DB::table('candidate_biographies')
+            ->whereNull('deleted_at')
+            ->orderByDesc('active')
+            ->orderByDesc('id')
+            ->first();
 
         $proposals = DB::table('government_proposals')
             ->whereNull('deleted_at')
@@ -51,7 +62,7 @@ class CampaignDashboardController extends Controller
             'football_teams' => DB::table('football_team_registrations')->whereNull('deleted_at')->where('active', true)->count(),
         ];
 
-        return view('dashboard', compact('sections', 'proposals', 'councilMembers', 'districtImages', 'contributions', 'stats'));
+        return view('dashboard', compact('sections', 'heroContent', 'candidateBio', 'proposals', 'councilMembers', 'districtImages', 'contributions', 'stats'));
     }
 
     public function updateVisibility(Request $request): RedirectResponse|JsonResponse
@@ -133,6 +144,108 @@ class CampaignDashboardController extends Controller
             'message' => 'Orden actualizado correctamente.',
             'orders' => $orders,
         ]);
+    }
+
+    public function updateHero(Request $request): JsonResponse
+    {
+        $hero = DB::table('landing_hero_contents')
+            ->whereNull('deleted_at')
+            ->orderByDesc('active')
+            ->orderByDesc('id')
+            ->first();
+
+        $data = $request->validate([
+            'eyebrow' => ['nullable', 'string', 'max:255'],
+            'title' => ['required', 'string', 'max:255'],
+            'highlighted_title' => ['nullable', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'primary_button_label' => ['nullable', 'string', 'max:255'],
+            'primary_button_url' => ['nullable', 'string'],
+            'secondary_button_label' => ['nullable', 'string', 'max:255'],
+            'secondary_button_url' => ['nullable', 'string'],
+            'campaign_year' => ['nullable', 'integer', 'min:2000', 'max:2100'],
+            'image_path' => ['nullable', 'string'],
+            'image' => ['nullable', 'image', 'max:4096'],
+        ]);
+
+        $imagePath = $this->storeUploadedImage($request, 'image', 'portada', $hero?->image_path)
+            ?: ($data['image_path'] ?? null);
+
+        $payload = [
+            'eyebrow' => $data['eyebrow'] ?? null,
+            'title' => $data['title'],
+            'highlighted_title' => $data['highlighted_title'] ?? null,
+            'description' => $data['description'] ?? null,
+            'primary_button_label' => $data['primary_button_label'] ?? null,
+            'primary_button_url' => $data['primary_button_url'] ?? null,
+            'secondary_button_label' => $data['secondary_button_label'] ?? null,
+            'secondary_button_url' => $data['secondary_button_url'] ?? null,
+            'campaign_year' => $data['campaign_year'] ?? 2026,
+            'image_path' => $imagePath,
+            'image_alt' => $data['title'],
+            'active' => true,
+            'updated_at' => now(),
+        ];
+
+        if ($hero) {
+            DB::table('landing_hero_contents')
+                ->where('id', $hero->id)
+                ->whereNull('deleted_at')
+                ->update($payload);
+        } else {
+            $payload['created_at'] = now();
+            DB::table('landing_hero_contents')->insert($payload);
+        }
+
+        return response()->json(['message' => 'Portada actualizada correctamente.']);
+    }
+
+    public function updateBiography(Request $request): JsonResponse
+    {
+        $bio = DB::table('candidate_biographies')
+            ->whereNull('deleted_at')
+            ->orderByDesc('active')
+            ->orderByDesc('id')
+            ->first();
+
+        $data = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'summary' => ['nullable', 'string'],
+            'facts_text' => ['nullable', 'string'],
+            'image_path' => ['nullable', 'string'],
+            'image' => ['nullable', 'image', 'max:4096'],
+        ]);
+
+        $imagePath = $this->storeUploadedImage($request, 'image', 'biografia', $bio?->image_path)
+            ?: ($data['image_path'] ?? null);
+
+        $facts = collect(preg_split('/\r\n|\r|\n/', $data['facts_text'] ?? ''))
+            ->map(fn ($fact) => trim($fact))
+            ->filter()
+            ->values()
+            ->all();
+
+        $payload = [
+            'title' => $data['title'],
+            'summary' => $data['summary'] ?? null,
+            'image_path' => $imagePath,
+            'image_alt' => $data['title'],
+            'facts' => json_encode($facts, JSON_UNESCAPED_UNICODE),
+            'active' => true,
+            'updated_at' => now(),
+        ];
+
+        if ($bio) {
+            DB::table('candidate_biographies')
+                ->where('id', $bio->id)
+                ->whereNull('deleted_at')
+                ->update($payload);
+        } else {
+            $payload['created_at'] = now();
+            DB::table('candidate_biographies')->insert($payload);
+        }
+
+        return response()->json(['message' => 'Biografía actualizada correctamente.']);
     }
 
     public function storeProposal(Request $request): RedirectResponse|JsonResponse
