@@ -67,7 +67,7 @@
                 </nav>
 
                 <div class="absolute bottom-0 left-0 right-0 border-t border-outline-variant/20 p-6">
-                    <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-outline">Campana 2026</p>
+                    <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-outline">Campaña 2026</p>
                 </div>
             </aside>
 
@@ -80,7 +80,7 @@
                         @isset($header)
                             {{ $header }}
                         @else
-                            <h1 class="font-headline text-[24px] font-extrabold text-primary">Panel de campana</h1>
+                            <h1 class="font-headline text-[24px] font-extrabold text-primary">Panel de campaña</h1>
                         @endisset
                     </div>
 

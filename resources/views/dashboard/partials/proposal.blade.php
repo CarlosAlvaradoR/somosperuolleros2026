@@ -18,7 +18,7 @@
         @method('PATCH')
 
         <div>
-            <label class="campaign-label" for="title-{{ $proposal->id }}">Titulo de propuesta</label>
+            <label class="campaign-label" for="title-{{ $proposal->id }}">Título de propuesta</label>
             <input id="title-{{ $proposal->id }}" name="title" class="campaign-input bg-white" value="{{ $proposal->title }}" required>
         </div>
         <div>
@@ -34,7 +34,7 @@
             <input id="order-{{ $proposal->id }}" name="sort_order" type="number" min="0" class="campaign-input bg-white" value="{{ $proposal->sort_order }}">
         </div>
         <div class="md:col-span-2">
-            <label class="campaign-label" for="summary-{{ $proposal->id }}">Descripcion</label>
+            <label class="campaign-label" for="summary-{{ $proposal->id }}">Descripción</label>
             <textarea id="summary-{{ $proposal->id }}" name="summary" class="campaign-input bg-white" rows="2">{{ $proposal->summary }}</textarea>
         </div>
         <div class="md:col-span-2">

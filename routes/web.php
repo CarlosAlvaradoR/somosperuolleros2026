@@ -4,6 +4,16 @@ use App\Http\Controllers\CampaignDashboardController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
+
+Route::get('/limpiar-cache-app', function () {
+    Artisan::call('route:clear');
+    Artisan::call('view:clear');
+    Artisan::call('config:clear');
+    Artisan::call('cache:clear');
+
+    return 'Cache limpiada correctamente.';
+});
 
 Route::get('/', function () {
     $sections = DB::table('site_sections')
@@ -71,7 +81,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/dashboard/visibility', [CampaignDashboardController::class, 'updateVisibility'])->name('dashboard.visibility.update');
     Route::post('/dashboard/portada', [CampaignDashboardController::class, 'updateHero'])->name('dashboard.hero.update');
     Route::post('/dashboard/biografia', [CampaignDashboardController::class, 'updateBiography'])->name('dashboard.biography.update');
-    Route::patch('/dashboard/reordenar/{type}', [CampaignDashboardController::class, 'reorder'])->name('dashboard.reorder');
+    Route::match(['post', 'patch'], '/dashboard/reordenar/{type}', [CampaignDashboardController::class, 'reorder'])->name('dashboard.reorder');
     Route::post('/dashboard/proposals', [CampaignDashboardController::class, 'storeProposal'])->name('dashboard.proposals.store');
     Route::patch('/dashboard/proposals/{proposal}', [CampaignDashboardController::class, 'updateProposal'])->name('dashboard.proposals.update');
     Route::delete('/dashboard/proposals/{proposal}', [CampaignDashboardController::class, 'destroyProposal'])->name('dashboard.proposals.destroy');
@@ -92,4 +102,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

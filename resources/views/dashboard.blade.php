@@ -701,14 +701,14 @@
 
                         try {
                             const response = await fetch(container.dataset.reorderUrl, {
-                                method: 'PATCH',
+                                method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                     'Accept': 'application/json',
                                     'X-Requested-With': 'XMLHttpRequest',
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                                 },
-                                body: JSON.stringify({ items }),
+                                body: JSON.stringify({ _method: 'PATCH', items }),
                             });
 
                             const data = await response.json();
